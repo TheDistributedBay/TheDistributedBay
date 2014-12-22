@@ -52,6 +52,9 @@ func (h *ConnectionHandler) shovel() {
 		case "Torrents":
 			for _, t := range msg.Data {
 				log.Print("ADDDING TORRENT WITHOUT VERIFICATION!!!!")
+				h.lock.Lock()
+				h.torrentList[t.Hash] = struct{}{}
+				h.lock.Unlock()
 				h.db.Add(t)
 			}
 		}
