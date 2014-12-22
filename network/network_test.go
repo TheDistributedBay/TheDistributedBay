@@ -5,13 +5,32 @@ import (
 	"testing"
 	"time"
 
+	"crypto/ecdsa"
+	"crypto/elliptic"
+	"crypto/rand"
+
+	"github.com/TheDistributedBay/TheDistributedBay/crypto"
 	"github.com/TheDistributedBay/TheDistributedBay/database"
 	"github.com/TheDistributedBay/TheDistributedBay/tls"
 )
 
-var (
-	testTorrent = &database.Torrent{"hash", "pk", "sig", "magnetlink", "name", "description", 1, time.Now(), []string{"tag1"}}
-)
+func createDefaultTorrent(d string) *database.Torrent {
+	t := &database.Torrent{"", "", "", "magnetlink", "name", d, 1, time.Now(), []string{"tag1"}}
+	k, err := ecdsa.GenerateKey(elliptic.P521(), rand.Reader)
+	if err != nil {
+		panic(err)
+	}
+	t.PublicKey, err = crypto.StringifyKey(&k.PublicKey)
+	if err != nil {
+		panic(err)
+	}
+	t.Hash = crypto.HashTorrent(t)
+	t.Signature, err = crypto.Sign(t.Hash, k)
+	if err != nil {
+		panic(err)
+	}
+	return t
+}
 
 type sewer struct {
 	r io.ReadCloser
@@ -51,8 +70,10 @@ func testSewer() (*sewer, *sewer) {
 }
 
 func TestSingleHop(t *testing.T) {
+	t1 := createDefaultTorrent("test1")
+
 	db1 := database.NewTorrentDB()
-	db1.Add(testTorrent)
+	db1.Add(t1)
 	cm1 := NewConnectionManager(db1)
 
 	db2 := database.NewTorrentDB()
@@ -71,17 +92,16 @@ func TestSingleHop(t *testing.T) {
 	case <-time.After(time.Second):
 	}
 
-	recv, err := db2.Get("hash")
+	recv, err := db2.Get(t1.Hash)
 	if err != nil {
-		t.Errorf("Expected torrent with hash in %v, error: %v", db2, err)
+		t.Fatalf("Expected torrent %v, error: %v", t1, err)
 	}
 
-	if recv.Hash != testTorrent.Hash {
-		t.Errorf("Expected torrent with %v, got %v", testTorrent, recv)
+	if recv.Hash != t1.Hash {
+		t.Errorf("Expected torrent %v, got %v", t1, recv)
 	}
 
-	t2 := &*testTorrent
-	t2.Hash = "foobar"
+	t2 := createDefaultTorrent("test2")
 
 	db1.Add(t2)
 
@@ -90,13 +110,13 @@ func TestSingleHop(t *testing.T) {
 	case <-time.After(time.Second):
 	}
 
-	recv, err = db2.Get("foobar")
+	recv, err = db2.Get(t2.Hash)
 	if err != nil {
-		t.Errorf("Expected torrent with hash in %v, error: %v", db2, err)
+		t.Fatalf("Expected torrent with hash in %v, error: %v", db2, err)
 	}
 
 	if recv.Hash != t2.Hash {
-		t.Errorf("Expected torrent with %v, got %v", testTorrent, recv)
+		t.Errorf("Expected torrent with %v, got %v", t1, recv)
 	}
 
 	cm1.Close()
