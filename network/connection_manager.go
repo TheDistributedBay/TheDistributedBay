@@ -6,11 +6,19 @@ import (
 	"net"
 
 	"github.com/TheDistributedBay/TheDistributedBay/database"
+	"github.com/TheDistributedBay/TheDistributedBay/tls"
 )
 
 type ConnectionManager struct {
 	db  database.Database
 	chs []io.Closer
+}
+
+type Connection interface {
+	Read(b []byte) (n int, err error)
+	Write(b []byte) (int, error)
+	Close() error
+	Protocol() string
 }
 
 func NewConnectionManager(db database.Database) *ConnectionManager {
@@ -26,11 +34,14 @@ func (m *ConnectionManager) Listen(l net.Listener) {
 			log.Printf("Error accepting connection on %v : %v", l, err)
 			return
 		}
-		m.Handle(c)
+		m.Handle(tls.Wrap(c))
 	}
 }
 
-func (m *ConnectionManager) Handle(c io.ReadWriteCloser) {
+func (m *ConnectionManager) Handle(c Connection) {
+	if c.Protocol() != tls.Proto {
+		log.Printf("Unrecognized proto on %v : %v", c, c.Protocol())
+	}
 	t := NewTranscoder(c)
 	ch := NewConnectionHandler(t, m.db)
 	m.chs = append(m.chs, ch)

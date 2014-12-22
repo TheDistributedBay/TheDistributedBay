@@ -12,6 +12,10 @@ import (
 	"time"
 )
 
+const (
+	Proto = "distributedbay/1"
+)
+
 func GenerateEmptyConfig() (*tls.Config, error) {
 	priv, err := ecdsa.GenerateKey(elliptic.P521(), rand.Reader)
 	if err != nil {
@@ -37,6 +41,7 @@ func GenerateEmptyConfig() (*tls.Config, error) {
 	ct := tls.Certificate{[][]byte{certbytes}, priv, nil, cert}
 	c := &tls.Config{InsecureSkipVerify: true}
 	c.Certificates = append(c.Certificates, ct)
+	c.NextProtos = []string{Proto}
 	return c, nil
 }
 
@@ -55,4 +60,16 @@ func Listen(addr string) (net.Listener, error) {
 	}
 	c, err := tls.Listen("tcp", addr, co)
 	return c, err
+}
+
+type wrap struct {
+	*tls.Conn
+}
+
+func (w *wrap) Protocol() string {
+	return w.ConnectionState().NegotiatedProtocol
+}
+
+func Wrap(c net.Conn) *wrap {
+	return &wrap{c.(*tls.Conn)}
 }

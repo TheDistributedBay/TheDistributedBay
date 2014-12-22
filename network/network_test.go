@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/TheDistributedBay/TheDistributedBay/database"
+	"github.com/TheDistributedBay/TheDistributedBay/tls"
 )
 
 var (
@@ -29,6 +30,10 @@ func (s *sewer) Read(b []byte) (n int, err error) {
 
 func (s *sewer) Write(b []byte) (n int, err error) {
 	return s.w.Write(b)
+}
+
+func (s *sewer) Protocol() string {
+	return tls.Proto
 }
 
 type dummyListener chan *database.Torrent
