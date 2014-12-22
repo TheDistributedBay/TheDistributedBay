@@ -12,20 +12,20 @@
     <tbody>
       <tr ng-repeat="torrent in torrents">
         <td class="title-row">
-          <div style="float: right; height: 16px;">
-            <a href="{{torrent.magnet}}" title="MAGNET LINK"><img src="/tpbimg/icons/magnet.png"></a>
+          <div class="magnet">
+            <a href="{{torrent.MagnetLink}}" title="Magnet Link"><i class="fa fa-magnet fa-lg"></i></a>
           </div>
-          <a href="/torrent/{{torrent.id}}/{{sanitize(torrent.name)}}">
-            {{torrent.name}}
+          <a href="/torrent/{{torrent.Hash}}/{{sanitize(torrent.Name)}}">
+            {{torrent.Name}}
           </a>
           <div class="subtitle">Download from
-            <a href="/search?category={{torrent.category}}" title="Browse {{torrent.category}} torrents">{{torrent.category}}</a>
+            <a href="/search?category={{torrent.CategoryID}}" title="Browse {{torrent.CategoryID}} torrents">{{torrent.CategoryID}}</a>
           </div>
         </td>
-        <td class="date-row">{{moment(torrent.date)}}</td>
-        <td class="size-row">{{torrent.size}}</td>
-        <td class="seeders-row sy">{{torrent.seeders}}</td>
-        <td class="leechers-row ly">{{torrent.leechers}}</td>
+        <td class="date-row">{{moment(torrent.CreatedAt)}}</td>
+        <td class="size-row">{{torrent.Size}}</td>
+        <td class="seeders-row sy">{{torrent.Seeders}}</td>
+        <td class="leechers-row ly">{{torrent.Leechers}}</td>
       </tr>
     </tbody>
   </table>

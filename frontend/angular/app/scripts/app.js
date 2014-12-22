@@ -43,6 +43,10 @@ angular
         templateUrl: 'views/search.html',
         controller: 'SearchCtrl'
       })
+      .when('/torrent/:hash/?:name?', {
+        templateUrl: 'views/torrent/view.html',
+        controller: 'TorrentViewCtrl'
+      })
       .otherwise({
         redirectTo: '/'
       });

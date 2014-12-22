@@ -16,7 +16,7 @@ angular.module('theDistributedBayApp')
         q: ''
       }, options);
       var queryString = _.map(options, function(v, k) {
-        return v + '=' + k;
+        return k + '=' + v;
       }).join('&');
       var defer = $q.defer();
       $http.get('/api/torrents?'+queryString).
@@ -26,7 +26,18 @@ angular.module('theDistributedBayApp')
         error(function(data, status, headers, config) {
           defer.reject(data);
         });
-      return defer;
+      return defer.promise;
+    };
+    this.getTorrent = function(hash) {
+      var defer = $q.defer();
+      $http.get('/api/torrent?hash='+escape(hash)).
+        success(function(data, status, headers, config) {
+          defer.resolve(data);
+        }).
+        error(function(data, status, headers, config) {
+          defer.reject(data);
+        });
+      return defer.promise;
     };
     this.addTorrent = function(options) {
       options = _.merge({
