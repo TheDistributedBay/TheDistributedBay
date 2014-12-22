@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	Proto = "distributedbay/1"
+	Proto = "distributedbay/1/json"
 )
 
 func GenerateEmptyConfig() (*tls.Config, error) {
