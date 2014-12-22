@@ -7,12 +7,12 @@ import (
 )
 
 type ConnectionHandler struct {
-	c  Connection
+	t  *Transcoder
 	db database.Database
 }
 
-func NewConnectionHandler(c Connection, db database.Database) *ConnectionHandler {
-	h := &ConnectionHandler{c, db}
+func NewConnectionHandler(t *Transcoder, db database.Database) *ConnectionHandler {
+	h := &ConnectionHandler{t, db}
 	go h.shovel()
 	return h
 }
@@ -23,11 +23,11 @@ func (h *ConnectionHandler) shovel() {
 	for _, h := range h.db.List() {
 		m[h] = struct{}{}
 	}
-	h.c.Write(Message{"TorrentList", m, nil})
+	h.t.Write(Message{"TorrentList", m, nil})
 	for {
-		msg, err := h.c.Read()
+		msg, err := h.t.Read()
 		if err != nil {
-			log.Printf("Error for %v : %v", h.c, err)
+			log.Printf("Error for %v : %v", h.t, err)
 			return
 		}
 		switch msg.code {
@@ -43,7 +43,7 @@ func (h *ConnectionHandler) shovel() {
 					torrents = append(torrents, t)
 				}
 			}
-			h.c.Write(Message{"Torrents", nil, torrents})
+			h.t.Write(Message{"Torrents", nil, torrents})
 		case "Torrents":
 			for _, t := range msg.data {
 				log.Print("ADDDING TORRENT WITHOUT VERIFICATION!!!!")
@@ -54,5 +54,5 @@ func (h *ConnectionHandler) shovel() {
 }
 
 func (h *ConnectionHandler) Close() error {
-	return h.c.Close()
+	return h.t.Close()
 }
