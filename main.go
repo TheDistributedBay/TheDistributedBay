@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"log"
 	"runtime"
 
@@ -17,6 +16,7 @@ func main() {
 
 	listen := flag.String("listen", ":7654", "Address to listen on")
 	connect := flag.String("connect", "", "Address to connect to")
+	http_address := flag.String("http", ":8080", "Address to listen on for HTTP")
 	flag.Parse()
 
 	db := database.NewTorrentDB()
@@ -36,7 +36,7 @@ func main() {
 		go cm.Listen(l)
 	}
 
-	fmt.Println("Running...")
-	frontend.Serve()
+	log.Println("Running...")
+	frontend.Serve(http_address, db)
 	cm.Close()
 }

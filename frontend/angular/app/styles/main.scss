@@ -31,10 +31,18 @@ body {
 .form-control, .btn, .well, .panel, .modal, .jumbotron {
   border-radius: 0 !important;
 }
-
+.ng-scope {
+  & > h1 {
+    @include text-shadow;
+    text-align: center;
+  }
+  & > form label {
+    @include text-shadow;
+  }
+}
 .torrents {
   text-align: center;
-  & > h1, & > a, th {
+  & > a, th {
     @include text-shadow;
   }
   & > a {
