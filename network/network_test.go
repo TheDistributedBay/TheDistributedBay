@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	testTorrent = &database.Torrent{"hash", "pk", "sig", "magnetlink", "name", "description", 1, 1, 1, time.Now(), []string{"tag1"}}
+	testTorrent = &database.Torrent{"hash", "pk", "sig", "magnetlink", "name", "description", 1, time.Now(), []string{"tag1"}}
 )
 
 type sewer struct {
