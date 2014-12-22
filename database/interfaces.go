@@ -1,4 +1,4 @@
-package TheDistributedBay
+package database
 
 import (
 	"time"

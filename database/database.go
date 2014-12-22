@@ -1,4 +1,4 @@
-package TheDistributedBay
+package database
 
 type Torrentdb struct {
 	torrents map[string]*Torrent
