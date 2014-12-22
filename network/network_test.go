@@ -6,10 +6,11 @@ import (
 	"time"
 
 	"github.com/TheDistributedBay/TheDistributedBay/database"
+	"github.com/TheDistributedBay/TheDistributedBay/tls"
 )
 
 var (
-	testTorrent = &database.Torrent{"hash", "pk", "sig", "magnetlink", "name", "description", 1, 1, 1, time.Now(), []string{"tag1"}}
+	testTorrent = &database.Torrent{"hash", "pk", "sig", "magnetlink", "name", "description", 1, time.Now(), []string{"tag1"}}
 )
 
 type sewer struct {
@@ -29,6 +30,10 @@ func (s *sewer) Read(b []byte) (n int, err error) {
 
 func (s *sewer) Write(b []byte) (n int, err error) {
 	return s.w.Write(b)
+}
+
+func (s *sewer) Protocol() string {
+	return tls.Proto
 }
 
 type dummyListener chan *database.Torrent

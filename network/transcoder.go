@@ -13,12 +13,6 @@ type Message struct {
 	Data     []*database.Torrent
 }
 
-type Connection interface {
-	Read() (Message, error)
-	Write(m Message) error
-	Close() error
-}
-
 type Transcoder struct {
 	c   io.ReadWriteCloser
 	enc *json.Encoder

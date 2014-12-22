@@ -18,8 +18,6 @@ type Torrent struct {
 	Name        string
 	Description string
 	CategoryID  uint64
-	Size        uint64
-	FileCount   uint64
 	CreatedAt   time.Time
 	Tags        []string
 }
