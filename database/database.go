@@ -5,6 +5,16 @@ import (
 	"sync"
 )
 
+type TorrentWriter interface {
+	NewTorrent(t *Torrent)
+}
+
+type Database interface {
+	Get(hash string) (*Torrent, error)
+	Add(t *Torrent)
+	List() []string
+	AddClient(w TorrentWriter)
+}
 type TorrentDB struct {
 	torrents map[string]*Torrent
 	writers  []TorrentWriter
@@ -14,6 +24,12 @@ type TorrentDB struct {
 func NewTorrentDB() *TorrentDB {
 	t := make(map[string]*Torrent)
 	return &TorrentDB{t, nil, &sync.RWMutex{}}
+}
+
+func (db *TorrentDB) NumTorrents() int {
+	db.lock.RLock()
+	defer db.lock.RUnlock()
+	return len(db.torrents)
 }
 
 func (db *TorrentDB) Get(hash string) (*Torrent, error) {

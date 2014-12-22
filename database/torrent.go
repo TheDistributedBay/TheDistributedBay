@@ -21,14 +21,3 @@ type Torrent struct {
 	CreatedAt   time.Time
 	Tags        []string
 }
-
-type TorrentWriter interface {
-	NewTorrent(t *Torrent)
-}
-
-type Database interface {
-	Get(hash string) (*Torrent, error)
-	Add(t *Torrent)
-	List() []string
-	AddClient(w TorrentWriter)
-}
