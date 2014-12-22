@@ -24,8 +24,13 @@ type Torrent struct {
 	Tags        []string
 }
 
+type TorrentWriter interface {
+	NewTorrent(t *Torrent)
+}
+
 type Database interface {
 	Get(hash string) (*Torrent, error)
 	Add(t *Torrent)
 	List() []string
+	AddClient(w TorrentWriter)
 }
