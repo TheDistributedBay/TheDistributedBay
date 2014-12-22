@@ -65,7 +65,7 @@ func Import(file string, db database.Database) {
 
 		db.Add(t)
 
-		if count%10 == 0 {
+		if count%1000 == 0 {
 			log.Println("Loaded: ", count)
 		}
 	}
