@@ -18,4 +18,6 @@ type Torrent struct {
 
 type Database interface {
 	Get(id uint64) Torrent
+	Add(t Torrent)
+	List() []uint64
 }
