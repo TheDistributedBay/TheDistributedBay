@@ -1,5 +1,5 @@
 Put the go fmt hook into git
 
 wget https://raw.githubusercontent.com/golang/go/master/misc/git/pre-commit -O .git/hooks/pre-commit
-chmod +x .git/hooks/pre-cpmmit
+chmod +x .git/hooks/pre-commit
 
