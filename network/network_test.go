@@ -31,6 +31,12 @@ func (s *sewer) Write(b []byte) (n int, err error) {
 	return s.w.Write(b)
 }
 
+type dummyListener chan *database.Torrent
+
+func (d *dummyListener) NewTorrent(t *database.Torrent) {
+	*d <- t
+}
+
 func testSewer() (*sewer, *sewer) {
 	pr1, pw1 := io.Pipe()
 	pr2, pw2 := io.Pipe()
@@ -48,15 +54,46 @@ func TestSingleHop(t *testing.T) {
 	cm2 := NewConnectionManager(db2)
 
 	l, r := testSewer()
-
 	go cm1.Handle(l)
 	go cm2.Handle(r)
 
-	time.Sleep(time.Second)
+	c := make(chan *database.Torrent)
+	listen := dummyListener(c)
+	db2.AddClient(&listen)
 
-	if _, err := db2.Get("hash"); err != nil {
+	select {
+	case <-listen:
+	case <-time.After(time.Second):
+	}
+
+	recv, err := db2.Get("hash")
+	if err != nil {
 		t.Errorf("Expected torrent with hash in %v, error: %v", db2, err)
 	}
+
+	if recv.Hash != testTorrent.Hash {
+		t.Errorf("Expected torrent with %v, got %v", testTorrent, recv)
+	}
+
+	t2 := &*testTorrent
+	t2.Hash = "foobar"
+
+	db1.Add(t2)
+
+	select {
+	case <-listen:
+	case <-time.After(time.Second):
+	}
+
+	recv, err = db2.Get("foobar")
+	if err != nil {
+		t.Errorf("Expected torrent with hash in %v, error: %v", db2, err)
+	}
+
+	if recv.Hash != t2.Hash {
+		t.Errorf("Expected torrent with %v, got %v", testTorrent, recv)
+	}
+
 	cm1.Close()
 	cm2.Close()
 }
