@@ -28,7 +28,6 @@ type TorrentClient struct {
 }
 
 func (tc TorrentClient) NewTorrent(t *database.Torrent) {
-	log.Println("NEW TORRENT", t, tc)
 	indexable := IndexableTorrent{
 		Name:        t.Name,
 		Description: t.Description,

@@ -15,17 +15,11 @@ import (
 )
 
 func createDefaultTorrent(d string) *database.Torrent {
-	t := &database.Torrent{"", "", "", "magnetlink", "name", d, 1, time.Now(), []string{"tag1"}}
 	k, err := ecdsa.GenerateKey(elliptic.P521(), rand.Reader)
 	if err != nil {
 		panic(err)
 	}
-	t.PublicKey, err = crypto.StringifyKey(&k.PublicKey)
-	if err != nil {
-		panic(err)
-	}
-	t.Hash = crypto.HashTorrent(t)
-	t.Signature, err = crypto.Sign(t.Hash, k)
+	t, err := crypto.CreateTorrent(k, "magnetlink", "name", d, "category", time.Now(), nil)
 	if err != nil {
 		panic(err)
 	}
@@ -102,6 +96,9 @@ func TestSingleHop(t *testing.T) {
 	}
 
 	t2 := createDefaultTorrent("test2")
+	if t2.Hash == t1.Hash {
+		t.Fatalf("identical hashes... wtf")
+	}
 
 	db1.Add(t2)
 

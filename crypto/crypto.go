@@ -14,21 +14,42 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"math/big"
+	"time"
 
 	"github.com/TheDistributedBay/TheDistributedBay/database"
 )
 
+func NewKey() (*ecdsa.PrivateKey, error) {
+	return ecdsa.GenerateKey(elliptic.P521(), rand.Reader)
+}
+
+func CreateTorrent(k *ecdsa.PrivateKey, magnetlink, name, description string, categoryid string, createdAt time.Time, tags []string) (*database.Torrent, error) {
+	t := &database.Torrent{"", "", "", magnetlink, name, description, 1, createdAt, tags}
+	var err error
+	t.PublicKey, err = StringifyKey(&k.PublicKey)
+	if err != nil {
+		return nil, err
+	}
+	t.Hash = HashTorrent(t)
+	t.Signature, err = Sign(t.Hash, k)
+	if err != nil {
+		return nil, err
+	}
+	return t, nil
+}
+
 func HashTorrent(t *database.Torrent) string {
 	h := sha512.New()
-	binary.Write(h, binary.LittleEndian, t.PublicKey)
-	binary.Write(h, binary.LittleEndian, t.MagnetLink)
-	binary.Write(h, binary.LittleEndian, t.Name)
-	binary.Write(h, binary.LittleEndian, t.Description)
+	io.WriteString(h, t.PublicKey)
+	io.WriteString(h, t.MagnetLink)
+	io.WriteString(h, t.Name)
+	io.WriteString(h, t.Description)
 	binary.Write(h, binary.LittleEndian, t.CategoryID)
-	binary.Write(h, binary.LittleEndian, t.CreatedAt)
+	binary.Write(h, binary.LittleEndian, t.CreatedAt.Unix())
 	for _, tag := range t.Tags {
-		binary.Write(h, binary.LittleEndian, tag)
+		io.WriteString(h, tag)
 	}
 	return hex.EncodeToString(h.Sum(nil))
 }
