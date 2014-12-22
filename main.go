@@ -9,6 +9,7 @@ import (
 	"github.com/TheDistributedBay/TheDistributedBay/frontend"
 	"github.com/TheDistributedBay/TheDistributedBay/importer"
 	"github.com/TheDistributedBay/TheDistributedBay/network"
+	"github.com/TheDistributedBay/TheDistributedBay/stats"
 	"github.com/TheDistributedBay/TheDistributedBay/tls"
 )
 
@@ -41,6 +42,8 @@ func main() {
 	if *dumpPath != "" {
 		go importer.Import(*dumpPath, db)
 	}
+
+	go stats.ReportStats(db, cm)
 
 	log.Println("Running...")
 	frontend.Serve(http_address, db)

@@ -12,6 +12,7 @@ import (
 type ConnectionManager struct {
 	db  database.Database
 	chs []io.Closer
+	l   net.Listener
 }
 
 type Connection interface {
@@ -22,12 +23,15 @@ type Connection interface {
 }
 
 func NewConnectionManager(db database.Database) *ConnectionManager {
-	m := &ConnectionManager{db, nil}
-	return m
+	return &ConnectionManager{db, nil, nil}
+}
+
+func (m *ConnectionManager) NumPeers() int {
+	return len(m.chs)
 }
 
 func (m *ConnectionManager) Listen(l net.Listener) {
-	m.chs = append(m.chs, l)
+	m.l = l
 	for {
 		c, err := l.Accept()
 		if err != nil {
@@ -52,5 +56,6 @@ func (m *ConnectionManager) Close() error {
 		err := c.Close()
 		log.Printf("Closing %v got %v", c, err)
 	}
+	m.l.Close()
 	return nil
 }
