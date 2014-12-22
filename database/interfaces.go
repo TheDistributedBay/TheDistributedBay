@@ -26,6 +26,6 @@ type Torrent struct {
 
 type Database interface {
 	Get(hash string) (*Torrent, error)
-	Add(t Torrent)
+	Add(t *Torrent)
 	List() []string
 }
