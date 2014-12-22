@@ -23,7 +23,7 @@ func (m *ConnectionManager) Listen(l net.Listener) {
 	for {
 		c, err := l.Accept()
 		if err != nil {
-			log.Print("Error accepting connection on %v : %v", l, err)
+			log.Printf("Error accepting connection on %v : %v", l, err)
 			return
 		}
 		m.Handle(c)
@@ -39,7 +39,7 @@ func (m *ConnectionManager) Handle(c net.Conn) {
 func (m *ConnectionManager) Close() error {
 	for _, c := range m.chs {
 		err := c.Close()
-		log.Print("Closing %v got %v", c, err)
+		log.Printf("Closing %v got %v", c, err)
 	}
 	return nil
 }
