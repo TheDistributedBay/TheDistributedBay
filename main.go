@@ -1,7 +1,7 @@
 package main
 
 import (
-	"./frontend"
+	"github.com/TheDistributedBay/TheDistributedBay/frontend"
 	"fmt"
 )
 
