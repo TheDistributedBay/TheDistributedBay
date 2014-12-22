@@ -36,6 +36,10 @@ func (m *ConnectionManager) Handle(c net.Conn) {
 	m.chs = append(m.chs, ch)
 }
 
-func (m *ConnectionManager) Close() {
-
+func (m *ConnectionManager) Close() error {
+	for _, c := range m.chs {
+		err := c.Close()
+		log.Print("Closing %v got %v", c, err)
+	}
+	return nil
 }

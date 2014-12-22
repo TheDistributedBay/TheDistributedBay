@@ -1,11 +1,39 @@
 package main
 
 import (
-	"github.com/TheDistributedBay/TheDistributedBay/frontend"
+	"crypto/tls"
+	"flag"
 	"fmt"
+	"log"
+
+	"github.com/TheDistributedBay/TheDistributedBay/database"
+	"github.com/TheDistributedBay/TheDistributedBay/frontend"
+	"github.com/TheDistributedBay/TheDistributedBay/network"
 )
 
 func main() {
+	listen := flag.String("listen", ":7654", "Address to listen on")
+	connect := flag.String("connect", "", "Address to connect to")
+	flag.Parse()
+
+	db := database.NewTorrentDB()
+	cm := network.NewConnectionManager(db)
+
+	if *connect != "" {
+		c, err := tls.Dial("tcp", *connect, &tls.Config{InsecureSkipVerify: true})
+		if err != nil {
+			log.Fatalf("Error trying to connect to %v : %v", *connect, err)
+		}
+		cm.Handle(c)
+	} else {
+		l, err := tls.Listen("tcp", *listen, &tls.Config{InsecureSkipVerify: true})
+		if err != nil {
+			log.Fatalf("Error trying to listen to %v : %v", *listen, err)
+		}
+		cm.Listen(l)
+	}
+
 	fmt.Println("Running...")
-        frontend.Serve()
+	frontend.Serve()
+	cm.Close()
 }
