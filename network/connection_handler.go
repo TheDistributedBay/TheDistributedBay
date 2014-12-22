@@ -6,25 +6,13 @@ import (
 	"github.com/TheDistributedBay/TheDistributedBay/database"
 )
 
-type Message struct {
-	code     string
-	torrents map[string]struct{}
-	data     []*database.Torrent
-}
-
-type Connection interface {
-	Read() (Message, error)
-	Write(Message) error
-}
-
 type ConnectionHandler struct {
-	c    Connection
-	db   database.Database
-	quit chan struct{}
+	c  Connection
+	db database.Database
 }
 
 func NewConnectionHandler(c Connection, db database.Database) *ConnectionHandler {
-	h := &ConnectionHandler{c, db, nil}
+	h := &ConnectionHandler{c, db}
 	go h.shovel()
 	return h
 }
@@ -63,4 +51,8 @@ func (h *ConnectionHandler) shovel() {
 			}
 		}
 	}
+}
+
+func (h *ConnectionHandler) Close() error {
+	return h.c.Close()
 }
