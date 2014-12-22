@@ -30,7 +30,7 @@ func main() {
 		if err != nil {
 			log.Fatalf("Error trying to listen to %v : %v", *listen, err)
 		}
-		cm.Listen(l)
+		go cm.Listen(l)
 	}
 
 	fmt.Println("Running...")
