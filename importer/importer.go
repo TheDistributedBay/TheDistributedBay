@@ -3,6 +3,7 @@ package importer
 import (
 	"compress/gzip"
 	"encoding/csv"
+	"fmt"
 	"io"
 	"log"
 	"os"
@@ -50,7 +51,7 @@ func Import(file string, db database.Database) {
 
 		name := rec[0]
 		//created := rec[1]
-		magnet := rec[2]
+		magnet := fmt.Sprintf("magnet:?xt=urn:btih:%s", rec[2])
 
 		category := rec[4]
 		//seeder := rec[5]
