@@ -1,7 +1,6 @@
 package main
 
 import (
-	"crypto/tls"
 	"flag"
 	"fmt"
 	"log"
@@ -9,6 +8,7 @@ import (
 	"github.com/TheDistributedBay/TheDistributedBay/database"
 	"github.com/TheDistributedBay/TheDistributedBay/frontend"
 	"github.com/TheDistributedBay/TheDistributedBay/network"
+	"github.com/TheDistributedBay/TheDistributedBay/tls"
 )
 
 func main() {
@@ -20,13 +20,13 @@ func main() {
 	cm := network.NewConnectionManager(db)
 
 	if *connect != "" {
-		c, err := tls.Dial("tcp", *connect, &tls.Config{InsecureSkipVerify: true})
+		c, err := tls.Dial(*connect)
 		if err != nil {
 			log.Fatalf("Error trying to connect to %v : %v", *connect, err)
 		}
 		cm.Handle(c)
 	} else {
-		l, err := tls.Listen("tcp", *listen, &tls.Config{InsecureSkipVerify: true})
+		l, err := tls.Listen(*listen)
 		if err != nil {
 			log.Fatalf("Error trying to listen to %v : %v", *listen, err)
 		}
