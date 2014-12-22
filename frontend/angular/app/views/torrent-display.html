@@ -1,0 +1,32 @@
+<div>
+  <table class="table-torrents table table-striped table-hover">
+    <thead>
+      <tr>
+        <th class="title-row">Torrents</th>
+        <th class="date-row">Age</th>
+        <th class="size-row">Size</th>
+        <th class="seeders-row">S</th>
+        <th class="leechers-row">L</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr ng-repeat="torrent in torrents">
+        <td class="title-row">
+          <div style="float: right; height: 16px;">
+            <a href="{{torrent.magnet}}" title="MAGNET LINK"><img src="/tpbimg/icons/magnet.png"></a>
+          </div>
+          <a href="/torrent/{{torrent.id}}/{{sanitize(torrent.name)}}">
+            {{torrent.name}}
+          </a>
+          <div class="subtitle">Download from
+            <a href="/search?category={{torrent.category}}" title="Browse {{torrent.category}} torrents">{{torrent.category}}</a>
+          </div>
+        </td>
+        <td class="date-row">{{moment(torrent.date)}}</td>
+        <td class="size-row">{{torrent.size}}</td>
+        <td class="seeders-row sy">{{torrent.seeders}}</td>
+        <td class="leechers-row ly">{{torrent.leechers}}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>

@@ -1,0 +1,85 @@
+$icon-font-path: "../bower_components/bootstrap-sass-official/assets/fonts/bootstrap/";
+// bower:scss
+@import "bootstrap-sass-official/assets/stylesheets/_bootstrap.scss";
+// endbower
+
+@mixin dotted-link {
+  color: white;
+  border-bottom: 1px dotted white;
+  &:hover {
+    border-bottom: none;
+  }
+}
+@mixin text-shadow {
+  color: white;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.25);
+}
+
+html {
+  height: 100%;
+  width: 100%;
+}
+body {
+  padding-top: 70px;
+  background-image: url(../images/hexagons.png), linear-gradient(30deg,#2276ad,#6ec654);
+  background-color: #2276ad;
+  height: 100%;
+  width: 100%;
+  overflow: auto;
+}
+
+.form-control, .btn, .well, .panel, .modal, .jumbotron {
+  border-radius: 0 !important;
+}
+
+.torrents {
+  text-align: center;
+  & > h1, & > a, th {
+    @include text-shadow;
+  }
+  & > a {
+    @include dotted-link;
+  }
+  .table-torrents {
+    text-align: left;
+  }
+}
+
+
+nav.navbar {
+  background-color: white;
+}
+
+.index-wrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+
+  .index {
+    display: table;
+    height: 100%;
+
+    .search {
+      display: table-cell;
+      vertical-align: middle;
+      text-align: center;
+
+      @include text-shadow;
+
+      p > a {
+        @include dotted-link;
+      }
+
+      label {
+        font-weight: normal;
+      }
+
+      img {
+        max-height: 50vh;
+        max-width: 90vw;
+      }
+    }
+  }
+}
