@@ -9,7 +9,7 @@ import (
 )
 
 func ReportStats(db *database.TorrentDB, cm *network.ConnectionManager) {
-	for range time.After(time.Minute) {
+	for range time.Tick(time.Minute) {
 		log.Printf("TorrentDB(%d torrents) PeerManager(%d peers)", db.NumTorrents(), cm.NumPeers())
 	}
 }
