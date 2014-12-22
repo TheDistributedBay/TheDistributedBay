@@ -35,6 +35,14 @@ angular
         templateUrl: 'views/recent.html',
         controller: 'RecentCtrl'
       })
+      .when('/torrent/add', {
+        templateUrl: 'views/torrent/add.html',
+        controller: 'TorrentAddCtrl'
+      })
+      .when('/search', {
+        templateUrl: 'views/search.html',
+        controller: 'SearchCtrl'
+      })
       .otherwise({
         redirectTo: '/'
       });

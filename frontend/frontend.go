@@ -5,17 +5,19 @@ package frontend
 //go:generate bash -c "cd angular; node_modules/grunt-cli/bin/grunt build"
 
 import (
-	"fmt"
+	"github.com/TheDistributedBay/TheDistributedBay/database"
 	"github.com/gorilla/mux"
+	"log"
 	"net/http"
 	"os"
 )
 
-func Serve() {
+func Serve(http_address *string, db database.Database) {
 	r := mux.NewRouter()
-	r.PathPrefix("/api/").Handler(ApiRouter())
+
+	r.PathPrefix("/api/").Handler(ApiRouter(db))
 	if os.Getenv("DEBUG") != "" {
-		fmt.Println("Debug mode is on.")
+		log.Println("Debug mode is on.")
 		r.PathPrefix("/styles/").Handler(http.FileServer(http.Dir("frontend/angular/.tmp/")))
 		r.PathPrefix("/bower_components/").Handler(http.FileServer(http.Dir("frontend/angular/")))
 		r.PathPrefix("/").Handler(NotFoundHook{
@@ -27,15 +29,19 @@ func Serve() {
 			"frontend/angular/dist/index.html"})
 	}
 	http.Handle("/", r)
-	err := http.ListenAndServe(":8080", nil)
+	err := http.ListenAndServe(*http_address, nil)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 	}
 }
 
-func ApiRouter() *mux.Router {
+func ApiRouter(db database.Database) *mux.Router {
+	tc := NewTorrentClient(db)
+	db.AddClient(tc)
+
 	r := mux.NewRouter()
-	r.HandleFunc("/api/torrents", TorrentsHandler)
+	r.Methods("GET").Path("/api/torrents").Handler(TorrentsHandler{tc})
+	r.Methods("POST").Path("/api/add_torrent").Handler(AddTorrentHandler{tc})
 
 	return r
 }
