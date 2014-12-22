@@ -4,6 +4,7 @@ import (
 	"log"
 	"sync"
 
+	"github.com/TheDistributedBay/TheDistributedBay/crypto"
 	"github.com/TheDistributedBay/TheDistributedBay/database"
 )
 
@@ -51,11 +52,14 @@ func (h *ConnectionHandler) shovel() {
 			go h.db.AddClient(h)
 		case "Torrents":
 			for _, t := range msg.Data {
-				log.Print("ADDDING TORRENT WITHOUT VERIFICATION!!!!")
-				h.lock.Lock()
-				h.torrentList[t.Hash] = struct{}{}
-				h.lock.Unlock()
-				h.db.Add(t)
+				if err := crypto.VerifyTorrent(t); err != nil {
+					log.Printf("Invalid torrent %s recieved : %v", t, err)
+				} else {
+					h.lock.Lock()
+					h.torrentList[t.Hash] = struct{}{}
+					h.lock.Unlock()
+					h.db.Add(t)
+				}
 			}
 		}
 	}

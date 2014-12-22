@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	Proto = "distributedbay/1"
+	Proto = "distributedbay/1/json"
 )
 
 func GenerateEmptyConfig() (*tls.Config, error) {
@@ -45,13 +45,13 @@ func GenerateEmptyConfig() (*tls.Config, error) {
 	return c, nil
 }
 
-func Dial(addr string) (net.Conn, error) {
+func Dial(addr string) (*wrap, error) {
 	co, err := GenerateEmptyConfig()
 	if err != nil {
 		return nil, err
 	}
 	c, err := tls.Dial("tcp", addr, co)
-	return c, err
+	return Wrap(c), err
 }
 func Listen(addr string) (net.Listener, error) {
 	co, err := GenerateEmptyConfig()
