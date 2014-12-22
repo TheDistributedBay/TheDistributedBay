@@ -23,18 +23,18 @@ func (h *ConnectionHandler) shovel() {
 	for _, h := range h.db.List() {
 		m[h] = struct{}{}
 	}
-	h.t.Write(Message{"TorrentList", m, nil})
+	go h.t.Write(Message{"TorrentList", m, nil})
 	for {
 		msg, err := h.t.Read()
 		if err != nil {
 			log.Printf("Error for %v : %v", h.t, err)
 			return
 		}
-		switch msg.code {
+		switch msg.Code {
 		case "TorrentList":
-			torrents := make([]*database.Torrent, 0, len(msg.torrents))
+			torrents := make([]*database.Torrent, 0)
 			for _, hash := range h.db.List() {
-				if _, ok := msg.torrents[hash]; !ok {
+				if _, ok := msg.Torrents[hash]; !ok {
 					t, err := h.db.Get(hash)
 					if err != nil {
 						log.Printf("Torrent dissapeared? : %v", hash)
@@ -43,9 +43,9 @@ func (h *ConnectionHandler) shovel() {
 					torrents = append(torrents, t)
 				}
 			}
-			h.t.Write(Message{"Torrents", nil, torrents})
+			go h.t.Write(Message{"Torrents", nil, torrents})
 		case "Torrents":
-			for _, t := range msg.data {
+			for _, t := range msg.Data {
 				log.Print("ADDDING TORRENT WITHOUT VERIFICATION!!!!")
 				h.db.Add(t)
 			}

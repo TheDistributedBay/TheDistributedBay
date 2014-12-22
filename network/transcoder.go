@@ -8,9 +8,9 @@ import (
 )
 
 type Message struct {
-	code     string
-	torrents map[string]struct{}
-	data     []*database.Torrent
+	Code     string
+	Torrents map[string]struct{}
+	Data     []*database.Torrent
 }
 
 type Connection interface {

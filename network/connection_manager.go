@@ -30,7 +30,7 @@ func (m *ConnectionManager) Listen(l net.Listener) {
 	}
 }
 
-func (m *ConnectionManager) Handle(c net.Conn) {
+func (m *ConnectionManager) Handle(c io.ReadWriteCloser) {
 	t := NewTranscoder(c)
 	ch := NewConnectionHandler(t, m.db)
 	m.chs = append(m.chs, ch)
