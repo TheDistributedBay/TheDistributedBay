@@ -22,8 +22,6 @@ func (th AddTorrentHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	t.Size = 0
-	t.FileCount = 0
 	t.CreatedAt = time.Now()
 
 	// TODO set public key, signature, hash
