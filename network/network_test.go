@@ -5,17 +5,13 @@ import (
 	"testing"
 	"time"
 
-	"crypto/ecdsa"
-	"crypto/elliptic"
-	"crypto/rand"
-
 	"github.com/TheDistributedBay/TheDistributedBay/crypto"
 	"github.com/TheDistributedBay/TheDistributedBay/database"
 	"github.com/TheDistributedBay/TheDistributedBay/tls"
 )
 
 func createDefaultTorrent(d string) *database.Torrent {
-	k, err := ecdsa.GenerateKey(elliptic.P521(), rand.Reader)
+	k, err := crypto.NewKey()
 	if err != nil {
 		panic(err)
 	}
