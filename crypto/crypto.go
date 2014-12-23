@@ -22,7 +22,7 @@ import (
 )
 
 func NewKey() (*ecdsa.PrivateKey, error) {
-	return ecdsa.GenerateKey(elliptic.P521(), rand.Reader)
+	return ecdsa.GenerateKey(elliptic.P224(), rand.Reader)
 }
 
 func CreateTorrent(k *ecdsa.PrivateKey, magnetlink, name, description string, categoryid string, createdAt time.Time, tags []string) (*database.Torrent, error) {
@@ -60,11 +60,11 @@ type encodedKey struct {
 }
 
 func stringifyKey(k *ecdsa.PublicKey) (string, error) {
-	if k.Curve != elliptic.P521() {
+	if k.Curve != elliptic.P224() {
 		panic("Incorrect curve in use")
 	}
 
-	e := encodedKey{"ecdsa:P521", k.X, k.Y}
+	e := encodedKey{"ecdsa:P224", k.X, k.Y}
 	b, err := json.Marshal(e)
 	if err != nil {
 		return "", err
@@ -78,12 +78,12 @@ func loadKey(p string) (*ecdsa.PublicKey, error) {
 	if err != nil {
 		return nil, err
 	}
-	if t.Curve != "ecdsa:P521" {
+	if t.Curve != "ecdsa:P224" {
 		return nil, errors.New("unrecognized key type :" + t.Curve)
 	}
 
 	k := &ecdsa.PublicKey{}
-	k.Curve = elliptic.P521()
+	k.Curve = elliptic.P224()
 	k.X = t.X
 	k.Y = t.Y
 	return k, nil

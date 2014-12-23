@@ -1,6 +1,9 @@
 package crypto
 
 import (
+	"crypto/ecdsa"
+	"crypto/elliptic"
+	"crypto/rand"
 	"testing"
 	"time"
 )
@@ -46,5 +49,45 @@ func BenchmarkVerify(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		VerifyTorrent(t)
+	}
+}
+
+func BenchmarkRawCreateP521(b *testing.B) {
+	data := "foo"
+	k, _ := ecdsa.GenerateKey(elliptic.P521(), rand.Reader)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		ecdsa.Sign(rand.Reader, k, []byte(data))
+	}
+}
+
+func BenchmarkRawCreateP224(b *testing.B) {
+	data := "foo"
+	k, _ := ecdsa.GenerateKey(elliptic.P224(), rand.Reader)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		ecdsa.Sign(rand.Reader, k, []byte(data))
+	}
+}
+
+func BenchmarkRawVerifyP521(b *testing.B) {
+	data := "foo"
+	k, _ := ecdsa.GenerateKey(elliptic.P521(), rand.Reader)
+	R, S, _ := ecdsa.Sign(rand.Reader, k, []byte(data))
+	pk := &k.PublicKey
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		ecdsa.Verify(pk, []byte(data), R, S)
+	}
+}
+
+func BenchmarkRawVerifyP224(b *testing.B) {
+	data := "foo"
+	k, _ := ecdsa.GenerateKey(elliptic.P224(), rand.Reader)
+	R, S, _ := ecdsa.Sign(rand.Reader, k, []byte(data))
+	pk := &k.PublicKey
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		ecdsa.Verify(pk, []byte(data), R, S)
 	}
 }
