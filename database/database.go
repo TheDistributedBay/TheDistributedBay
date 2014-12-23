@@ -19,11 +19,16 @@ type TorrentDB struct {
 	torrents map[string]*Torrent
 	writers  []TorrentWriter
 	lock     *sync.RWMutex
+	r        chan struct{}
 }
 
 func NewTorrentDB() *TorrentDB {
 	t := make(map[string]*Torrent)
-	return &TorrentDB{t, nil, &sync.RWMutex{}}
+	db := &TorrentDB{t, nil, &sync.RWMutex{}, make(chan struct{}, 10)}
+	for i := 0; i < 10; i++ {
+		db.r <- struct{}{}
+	}
+	return db
 }
 
 func (db *TorrentDB) NumTorrents() int {
@@ -51,7 +56,11 @@ func (db *TorrentDB) Add(t *Torrent) {
 	}
 	db.torrents[t.Hash] = t
 	for _, w := range db.writers {
-		go w.NewTorrent(t)
+		<-db.r
+		go func() {
+			w.NewTorrent(t)
+			db.r <- struct{}{}
+		}()
 	}
 }
 

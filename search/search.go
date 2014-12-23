@@ -11,9 +11,14 @@ import (
 
 func NewSearcher(db database.Database) (*Searcher, error) {
 	mapping := bleve.NewIndexMapping()
-	mapping.TypeMapping["Hash"] = bleve.NewDocumentDisabledMapping()
-	mapping.TypeMapping["PublicKey"] = bleve.NewDocumentDisabledMapping()
-	mapping.TypeMapping["Signature"] = bleve.NewDocumentDisabledMapping()
+	doc := bleve.NewDocumentMapping()
+	ignore := bleve.NewTextFieldMapping()
+	ignore.Index = false
+	ignore.Store = false
+	doc.AddFieldMappingsAt("Hash", ignore)
+	doc.AddFieldMappingsAt("PublicKey", ignore)
+	doc.AddFieldMappingsAt("Signature", ignore)
+	mapping.DefaultMapping = doc
 	os.RemoveAll("search.bleve")
 	index, err := bleve.New("search.bleve", mapping)
 	if err != nil {

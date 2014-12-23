@@ -5,6 +5,8 @@ import (
 	"log"
 	"runtime"
 
+	_ "net/http/pprof"
+
 	"github.com/TheDistributedBay/TheDistributedBay/database"
 	"github.com/TheDistributedBay/TheDistributedBay/frontend"
 	"github.com/TheDistributedBay/TheDistributedBay/importer"
