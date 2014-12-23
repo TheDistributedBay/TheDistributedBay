@@ -28,19 +28,19 @@ func NewKey() (*ecdsa.PrivateKey, error) {
 func CreateTorrent(k *ecdsa.PrivateKey, magnetlink, name, description string, categoryid string, createdAt time.Time, tags []string) (*database.Torrent, error) {
 	t := &database.Torrent{"", "", "", magnetlink, name, description, 1, createdAt, tags}
 	var err error
-	t.PublicKey, err = StringifyKey(&k.PublicKey)
+	t.PublicKey, err = stringifyKey(&k.PublicKey)
 	if err != nil {
 		return nil, err
 	}
-	t.Hash = HashTorrent(t)
-	t.Signature, err = Sign(t.Hash, k)
+	t.Hash = hashTorrent(t)
+	t.Signature, err = sign(t.Hash, k)
 	if err != nil {
 		return nil, err
 	}
 	return t, nil
 }
 
-func HashTorrent(t *database.Torrent) string {
+func hashTorrent(t *database.Torrent) string {
 	h := sha512.New()
 	io.WriteString(h, t.PublicKey)
 	io.WriteString(h, t.MagnetLink)
@@ -59,7 +59,7 @@ type encodedKey struct {
 	X, Y  *big.Int
 }
 
-func StringifyKey(k *ecdsa.PublicKey) (string, error) {
+func stringifyKey(k *ecdsa.PublicKey) (string, error) {
 	if k.Curve != elliptic.P521() {
 		panic("Incorrect curve in use")
 	}
@@ -72,7 +72,7 @@ func StringifyKey(k *ecdsa.PublicKey) (string, error) {
 	return string(b), err
 }
 
-func LoadKey(p string) (*ecdsa.PublicKey, error) {
+func loadKey(p string) (*ecdsa.PublicKey, error) {
 	t := encodedKey{}
 	err := json.Unmarshal([]byte(p), &t)
 	if err != nil {
@@ -93,7 +93,7 @@ type encodedSignature struct {
 	R, S *big.Int
 }
 
-func Sign(data string, k *ecdsa.PrivateKey) (string, error) {
+func sign(data string, k *ecdsa.PrivateKey) (string, error) {
 	sig := encodedSignature{}
 	var err error
 	sig.R, sig.S, err = ecdsa.Sign(rand.Reader, k, []byte(data))
@@ -105,9 +105,9 @@ func Sign(data string, k *ecdsa.PrivateKey) (string, error) {
 	return string(b), err
 }
 
-func Verify(data string, signature string, key string) error {
+func verify(data string, signature string, key string) error {
 	sig := encodedSignature{}
-	pk, err := LoadKey(key)
+	pk, err := loadKey(key)
 	if err != nil {
 		return err
 	}
@@ -125,10 +125,10 @@ func Verify(data string, signature string, key string) error {
 }
 
 func VerifyTorrent(t *database.Torrent) error {
-	h := HashTorrent(t)
+	h := hashTorrent(t)
 	if h != t.Hash {
 		return errors.New(fmt.Sprintf("mutated hash %s vs %s", h, t.Hash))
 	}
 
-	return Verify(h, t.Signature, t.PublicKey)
+	return verify(h, t.Signature, t.PublicKey)
 }
