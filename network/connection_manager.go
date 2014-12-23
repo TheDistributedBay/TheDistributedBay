@@ -56,6 +56,8 @@ func (m *ConnectionManager) Close() error {
 		err := c.Close()
 		log.Printf("Closing %v got %v", c, err)
 	}
-	m.l.Close()
+	if m.l != nil {
+		m.l.Close()
+	}
 	return nil
 }
