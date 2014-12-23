@@ -18,8 +18,9 @@ func main() {
 
 	listen := flag.String("listen", ":7654", "Address to listen on")
 	connect := flag.String("connect", "", "Address to connect to")
-	http_address := flag.String("http", ":8080", "Address to listen on for HTTP")
+	httpAddress := flag.String("http", ":8080", "Address to listen on for HTTP")
 	dumpPath := flag.String("databasedump", "", "The path to a database dump that can be loaded. This should end in .csv.gz")
+	devAssets := flag.Bool("devassets", false, "Tells the front end to serve development assests instead of the precompiled production ones.")
 	flag.Parse()
 
 	db := database.NewTorrentDB()
@@ -46,6 +47,6 @@ func main() {
 	go stats.ReportStats(db, cm)
 
 	log.Println("Running...")
-	frontend.Serve(http_address, db)
+	frontend.Serve(httpAddress, db, *devAssets)
 	cm.Close()
 }

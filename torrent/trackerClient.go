@@ -3,16 +3,16 @@ package torrent
 import (
 	"bytes"
 	"encoding/binary"
+	"encoding/hex"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"math/rand"
 	"net"
+	"net/http"
 	"net/url"
 	"time"
-  "net/http"
-  "io/ioutil"
-  "encoding/hex"
 )
 
 // Code to talk to trackers.
@@ -21,16 +21,16 @@ import (
 //  BEP 15 UDP Tracker Protocol
 
 type TrackerResponse struct {
-  InfoHash string
-  Seeders, Leechers, Completed uint
+	InfoHash                     string
+	Seeders, Leechers, Completed uint
 }
 
 func ScrapeTrackers(scrapeList []string, infoHashes []string) ([]TrackerResponse, error) {
 	for _, tracker := range scrapeList {
-    tr, err := queryTracker(infoHashes, tracker)
-    if err == nil {
-      return tr, nil
-    }
+		tr, err := queryTracker(infoHashes, tracker)
+		if err == nil {
+			return tr, nil
+		}
 	}
 	return nil, errors.New("Did not successfully contact a tracker.")
 }
@@ -59,10 +59,9 @@ func proxyHttpGet(url string) (r *http.Response, e error) {
 	return proxyHttpClient().Get(url)
 }
 
-func proxyHttpClient() (client *http.Client) {
+func proxyHttpClient() *http.Client {
 	tr := &http.Transport{Dial: nil}
-	client = &http.Client{Transport: tr}
-	return
+	return &http.Client{Transport: tr}
 }
 
 func getTrackerInfo(url string) (tr []TrackerResponse, err error) {
@@ -79,24 +78,24 @@ func getTrackerInfo(url string) (tr []TrackerResponse, err error) {
 		return
 	}
 	//var tr2 TrackerResponse
-  log.Println("HTTP REQ TODO", r.Body)
+	log.Println("HTTP REQ TODO", r.Body)
 	/*err = bencode.Unmarshal(r.Body, &tr2)
 	r.Body.Close()
 	if err != nil {
 		return
 	}
 	tr = &tr2
-  */
+	*/
 	return
 }
 
 func queryHTTPTracker(infoHashes []string, u *url.URL) (tr []TrackerResponse, err error) {
 	uq := u.Query()
-  for _, infoHash := range infoHashes {
-    uq.Add("info_hash", infoHash)
-  }
+	for _, infoHash := range infoHashes {
+		uq.Add("info_hash", infoHash)
+	}
 
-  log.Println("HTTP INFO HASH DEBUG REMOVE THIS", uq)
+	log.Println("HTTP INFO HASH DEBUG REMOVE THIS", uq)
 
 	// Don't report IPv6 address, the user might prefer to keep
 	// that information private when communicating with IPv4 hosts.
@@ -117,7 +116,7 @@ func queryHTTPTracker(infoHashes []string, u *url.URL) (tr []TrackerResponse, er
 	if tr == nil || err != nil {
 		log.Println("Error: Could not fetch tracker info:", err)
 	}
-  return
+	return
 }
 
 func findLocalIPV6AddressFor(hostAddr string) (local string, err error) {
@@ -155,8 +154,8 @@ func queryUDPTracker(infoHashes []string, u *url.URL) (tr []TrackerResponse, err
 	defer func() { con.Close() }()
 
 	var connectionID uint64
-	for retry := uint(0); retry < uint(8); retry++ {
-		err = con.SetDeadline(time.Now().Add(15 * (1 << retry) * time.Second))
+	for retry := uint(0); retry < uint(3); retry++ {
+		err = con.SetDeadline(time.Now().Add(2 * time.Second))
 		if err != nil {
 			return
 		}
@@ -171,7 +170,7 @@ func queryUDPTracker(infoHashes []string, u *url.URL) (tr []TrackerResponse, err
 			return
 		}
 	}
-  return getScrapeFromUDPTracker(con, connectionID, infoHashes)
+	return getScrapeFromUDPTracker(con, connectionID, infoHashes)
 }
 
 func connectToUDPTracker(con *net.UDPConn) (connectionID uint64, err error) {
@@ -255,27 +254,26 @@ func getScrapeFromUDPTracker(con *net.UDPConn, connectionID uint64, infoHashes [
 		return
 	}
 
-  for _, infoHash := range infoHashes {
-    var binaryInfoHash []byte
-    binaryInfoHash, err = hex.DecodeString(infoHash)
-    err = binary.Write(announcementRequest, binary.BigEndian, binaryInfoHash)
-    if err != nil {
-      return
-    }
-  }
+	for _, infoHash := range infoHashes {
+		var binaryInfoHash []byte
+		binaryInfoHash, err = hex.DecodeString(infoHash)
+		err = binary.Write(announcementRequest, binary.BigEndian, binaryInfoHash)
+		if err != nil {
+			return
+		}
+	}
 
 	_, err = con.Write(announcementRequest.Bytes())
 	if err != nil {
 		return
 	}
 
-  torrentRequestCount := len(infoHashes)
+	torrentRequestCount := len(infoHashes)
 
 	const minimumResponseLen = 8
 	const torrentsDataSize = 12
 	expectedResponseLen := minimumResponseLen + torrentsDataSize*torrentRequestCount
 	responseBytes := make([]byte, expectedResponseLen)
-
 
 	var responseLen int
 	responseLen, err = con.Read(responseBytes)
@@ -305,29 +303,29 @@ func getScrapeFromUDPTracker(con *net.UDPConn, connectionID uint64, infoHashes [
 		err = fmt.Errorf("Unexpected response transactionID %x", responseTransactionID)
 		return
 	}
-  tr = make([]TrackerResponse, torrentRequestCount)
-  for i, infoHash := range infoHashes {
-    var seeders uint32
-    err = binary.Read(response, binary.BigEndian, &seeders)
-    if err != nil {
-      return
-    }
-    var completed uint32
-    err = binary.Read(response, binary.BigEndian, &completed)
-    if err != nil {
-      return
-    }
-    var leechers uint32
-    err = binary.Read(response, binary.BigEndian, &leechers)
-    if err != nil {
-      return
-    }
-    tr[i] = TrackerResponse {
-      InfoHash: infoHash,
-      Seeders: uint(seeders),
-      Completed: uint(completed),
-      Leechers: uint(leechers),
-    }
-  }
+	tr = make([]TrackerResponse, torrentRequestCount)
+	for i, infoHash := range infoHashes {
+		var seeders uint32
+		err = binary.Read(response, binary.BigEndian, &seeders)
+		if err != nil {
+			return
+		}
+		var completed uint32
+		err = binary.Read(response, binary.BigEndian, &completed)
+		if err != nil {
+			return
+		}
+		var leechers uint32
+		err = binary.Read(response, binary.BigEndian, &leechers)
+		if err != nil {
+			return
+		}
+		tr[i] = TrackerResponse{
+			InfoHash:  infoHash,
+			Seeders:   uint(seeders),
+			Completed: uint(completed),
+			Leechers:  uint(leechers),
+		}
+	}
 	return
 }

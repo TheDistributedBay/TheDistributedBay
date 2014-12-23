@@ -4,10 +4,12 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+
+	"github.com/TheDistributedBay/TheDistributedBay/database"
 )
 
 type GetTorrentHandler struct {
-	TorrentClient
+	db database.Database
 }
 
 func (th GetTorrentHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -18,7 +20,7 @@ func (th GetTorrentHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	torrent, err := th.TorrentClient.Database.Get(hash)
+	torrent, err := th.db.Get(hash)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
