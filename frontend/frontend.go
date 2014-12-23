@@ -5,12 +5,15 @@ package frontend
 //go:generate bash -c "cd angular; node_modules/grunt-cli/bin/grunt build"
 
 import (
-	"github.com/TheDistributedBay/TheDistributedBay/database"
-	"github.com/gorilla/mux"
 	"log"
 	"mime"
 	"net/http"
 	"os"
+
+	"github.com/gorilla/mux"
+
+	"github.com/TheDistributedBay/TheDistributedBay/database"
+	"github.com/TheDistributedBay/TheDistributedBay/search"
 )
 
 func Serve(httpAddress *string, db database.Database) {
@@ -20,7 +23,11 @@ func Serve(httpAddress *string, db database.Database) {
 
 	r := mux.NewRouter()
 
-	r.PathPrefix("/api/").Handler(ApiRouter(db))
+	apirouter, err := ApiRouter(db)
+	if err != nil {
+		log.Print(err)
+	}
+	r.PathPrefix("/api/").Handler(apirouter)
 	if os.Getenv("DEBUG") != "" {
 		log.Println("Debug mode is on.")
 		r.PathPrefix("/styles/").Handler(http.FileServer(http.Dir("frontend/angular/.tmp/")))
@@ -35,22 +42,24 @@ func Serve(httpAddress *string, db database.Database) {
 	}
 	http.Handle("/", r)
 	log.Println("Web server listening on", *httpAddress)
-	err := http.ListenAndServe(*httpAddress, nil)
+	err = http.ListenAndServe(*httpAddress, nil)
 	if err != nil {
 		log.Println(err)
 	}
 }
 
-func ApiRouter(db database.Database) *mux.Router {
-	tc := NewTorrentClient(db)
-	db.AddClient(tc)
+func ApiRouter(db database.Database) (*mux.Router, error) {
+	s, err := search.NewSearcher(db)
+	if err != nil {
+		return nil, err
+	}
 
 	r := mux.NewRouter()
-	r.Methods("GET").Path("/api/torrents").Handler(TorrentsHandler{tc})
-	r.Methods("POST").Path("/api/add_torrent").Handler(AddTorrentHandler{tc})
-	r.Methods("GET").Path("/api/torrent").Handler(GetTorrentHandler{tc})
+	r.Methods("GET").Path("/api/torrents").Handler(TorrentsHandler{s, db})
+	r.Methods("POST").Path("/api/add_torrent").Handler(AddTorrentHandler{db})
+	r.Methods("GET").Path("/api/torrent").Handler(GetTorrentHandler{db})
 
-	return r
+	return r, nil
 }
 
 type hookedResponseWriter struct {

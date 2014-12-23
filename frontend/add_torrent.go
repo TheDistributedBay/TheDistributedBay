@@ -4,13 +4,14 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"encoding/json"
-	"github.com/TheDistributedBay/TheDistributedBay/database"
 	"net/http"
 	"time"
+
+	"github.com/TheDistributedBay/TheDistributedBay/database"
 )
 
 type AddTorrentHandler struct {
-	TorrentClient
+	db database.Database
 }
 
 func (th AddTorrentHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -29,7 +30,7 @@ func (th AddTorrentHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	t.Signature = "sign me please!"
 	t.Hash = randomStr()
 
-	th.TorrentClient.Database.Add(&t)
+	th.db.Add(&t)
 
 	js, err := json.Marshal(t)
 	if err != nil {

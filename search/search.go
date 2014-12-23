@@ -1,20 +1,21 @@
-package frontend
+package search
 
 import (
 	"github.com/TheDistributedBay/TheDistributedBay/database"
 	"github.com/blevesearch/bleve"
-	"log"
 	"os"
 )
 
-func NewTorrentClient(db database.Database) TorrentClient {
+func NewSearcher(db database.Database) (*Searcher, error) {
 	mapping := bleve.NewIndexMapping()
 	os.RemoveAll("search.bleve")
 	index, err := bleve.New("search.bleve", mapping)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
-	return TorrentClient{index, db}
+	s := &Searcher{index}
+	go db.AddClient(s)
+	return s, nil
 }
 
 type IndexableTorrent struct {
@@ -22,25 +23,24 @@ type IndexableTorrent struct {
 	Tags              []string
 }
 
-type TorrentClient struct {
+type Searcher struct {
 	bleve.Index
-	database.Database
 }
 
-func (tc TorrentClient) NewTorrent(t *database.Torrent) {
+func (s *Searcher) NewTorrent(t *database.Torrent) {
 	indexable := IndexableTorrent{
 		Name:        t.Name,
 		Description: t.Description,
 		Tags:        t.Tags,
 	}
-	tc.Index.Index(t.Hash, indexable)
+	s.Index.Index(t.Hash, t)
+	s.Index.Index(t.Hash, indexable)
 }
 
-func (tc TorrentClient) Search(queryStr string) (*bleve.SearchResult, error) {
+func (s *Searcher) Search(queryStr string) (*bleve.SearchResult, error) {
 	query := bleve.NewQueryStringQuery(queryStr)
 	searchRequest := bleve.NewSearchRequest(query)
-	searchRequest.Size = 50
-	result, err := tc.Index.Search(searchRequest)
+	result, err := s.Index.Search(searchRequest)
 	if err != nil {
 		return nil, err
 	}
