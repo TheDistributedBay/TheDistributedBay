@@ -11,7 +11,11 @@
  */
 angular.module('theDistributedBayApp')
   .service('data', function ($http, $q) {
+    var searchCancel;
     this.search = function(options) {
+      if (searchCancel) {
+        searchCancel.resolve();
+      }
       options = _.merge({
         q: ''
       }, options);
@@ -19,7 +23,8 @@ angular.module('theDistributedBayApp')
         return k + '=' + v;
       }).join('&');
       var defer = $q.defer();
-      $http.get('/api/torrents?'+queryString).
+      searchCancel = $q.defer();
+      $http.get('/api/torrents?'+queryString, {timeout: searchCancel.promise, cache: true}).
         success(function(data, status, headers, config) {
           defer.resolve(data);
         }).
@@ -30,7 +35,7 @@ angular.module('theDistributedBayApp')
     };
     this.getTorrent = function(hash) {
       var defer = $q.defer();
-      $http.get('/api/torrent?hash='+escape(hash)).
+      $http.get('/api/torrent?hash='+escape(hash), {cache: true}).
         success(function(data, status, headers, config) {
           defer.resolve(data);
         }).

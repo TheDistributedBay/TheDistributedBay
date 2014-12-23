@@ -22,6 +22,7 @@ html {
 body {
   background-image: url(../images/hexagons.png), linear-gradient(30deg,#2276ad,#6ec654);
   background-color: #2276ad;
+  background-attachment: fixed;
   height: 100%;
   width: 100%;
   overflow: auto;
@@ -33,7 +34,7 @@ body {
   border-radius: 0 !important;
 }
 
-a {
+a:not[href="/"] {
   $link-color: #337ab7;
   @include dotted-link;
   color: $link-color;
@@ -84,6 +85,10 @@ a {
     .magnet {
       float: right;
     }
+    tbody {
+      background-color: white;
+      box-shadow: 1px 1px 2px rgba(0,0,0,0.25);
+    }
   }
 }
 
@@ -92,7 +97,7 @@ nav.navbar {
   background-color: white;
 }
 
-.index-wrapper {
+.index-wrapper.form-big {
   position: absolute;
   top: 0;
   left: 0;

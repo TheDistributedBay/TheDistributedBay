@@ -17,7 +17,7 @@ angular
     'ngSanitize',
     'ngTouch'
   ])
-  .config(function ($routeProvider, $locationProvider) {
+  .config(function ($routeProvider, $locationProvider, $compileProvider) {
     $routeProvider
       .when('/', {
         templateUrl: 'views/main.html',
@@ -50,6 +50,10 @@ angular
       .otherwise({
         redirectTo: '/'
       });
+
     // use the HTML5 History API
     $locationProvider.html5Mode(true);
+
+    // Allow magnet links
+    $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|ftp|mailto|magnet):/);
   });
