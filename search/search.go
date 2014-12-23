@@ -6,12 +6,14 @@ import (
 	"github.com/TheDistributedBay/TheDistributedBay/database"
 )
 
+const file = "index.bleve"
+
 func NewSearcher(db database.Database) (*Searcher, error) {
 	b, err := NewBleve("search.bleve")
-	b.BatchSize = 100
 	if err != nil {
 		return nil, err
 	}
+	b.BatchSize = 100
 	s := &Searcher{b, db}
 	go db.AddClient(s)
 	return s, nil

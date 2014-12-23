@@ -113,6 +113,10 @@ search-form {
   display: table-cell;
   vertical-align: middle;
 
+  #navlinks a {
+    color: white;
+  }
+
   &.form-big {
     text-align: center;
     img.small, .subm-small {
