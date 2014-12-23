@@ -7,6 +7,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/TheDistributedBay/TheDistributedBay/crypto"
@@ -61,22 +62,21 @@ func ProduceTorrents(file string, c chan *database.Torrent) {
 	close(c)
 }
 
-func WriteDb(db database.Database, c chan *database.Torrent, totalRows *int) {
+func WriteDb(db database.Database, c chan *database.Torrent, totalRows int64) {
 	start := time.Now()
-	count := 0
+	count := int64(0)
 	for t := range c {
 		count++
 		db.Add(t)
 		if count%1000 == 0 {
-			etaSeconds := time.Now().Sub(start).Seconds() / (float64)(count) * (float64)(*totalRows)
-			eta := time.Duration(etaSeconds) * time.Second
-			log.Println("Loaded: ", count, "of", *totalRows, "(ETA:", eta.String()+")")
+			eta := time.Now().Sub(start) * time.Duration(totalRows) / time.Duration(count)
+			log.Println("Loaded: ", count, "of", totalRows, "(ETA:", eta.String()+")")
 		}
 	}
 	log.Println("TOTAL", count)
 }
 
-func CalculateSize(file string, totalRows *int) {
+func CalculateSize(file string) int64 {
 	f, err := os.Open(file)
 	if err != nil {
 		log.Fatal(err)
@@ -88,19 +88,19 @@ func CalculateSize(file string, totalRows *int) {
 	}
 	defer gr.Close()
 
-	cr := csv.NewReader(gr)
-	cr.LazyQuotes = true
-	cr.Comma = '|'
-
-	for _, err := cr.Read(); err != io.EOF; _, err = cr.Read() {
-		*totalRows += 1
+	totalRows := int64(0)
+	b := make([]byte, 1024)
+	for n, err := f.Read(b); err != io.EOF; n, err = f.Read(b) {
+		totalRows += int64(strings.Count(string(b[0:n]), "\n"))
 	}
+	return totalRows
 }
 
 func Import(file string, db database.Database) {
 	c := make(chan *database.Torrent, 2)
-	totalRows := 0
+	log.Print("Calculating size")
+	totalRows := CalculateSize(file)
+	log.Print("Done")
 	go ProduceTorrents(file, c)
-	go WriteDb(db, c, &totalRows)
-	go CalculateSize(file, &totalRows)
+	go WriteDb(db, c, totalRows)
 }
