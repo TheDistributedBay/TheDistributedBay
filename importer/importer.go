@@ -13,9 +13,8 @@ import (
 	"github.com/TheDistributedBay/TheDistributedBay/database"
 )
 
-func Import(file string, db database.Database) {
+func ProduceTorrents(file string, c chan *database.Torrent) {
 	log.Println("Reading database dump from:", file)
-
 	f, err := os.Open(file)
 	if err != nil {
 		log.Fatal(err)
@@ -31,21 +30,16 @@ func Import(file string, db database.Database) {
 	cr.LazyQuotes = true
 	cr.Comma = '|'
 
-	count := 0
-
-	// Signing import with initial key
+	// Signing import with random initial key
 	ecdsa, err := crypto.NewKey()
 	if err != nil {
 		log.Print(err)
 		return
 	}
 
-	rec, err := cr.Read()
-	for ; err != io.EOF; rec, err = cr.Read() {
-		count += 1
+	for rec, err := cr.Read(); err != io.EOF; rec, err = cr.Read() {
 		if err != nil {
 			log.Print(err)
-			log.Print(rec)
 			continue
 		}
 
@@ -62,12 +56,25 @@ func Import(file string, db database.Database) {
 			log.Print(err)
 			continue
 		}
+		c <- t
+	}
+	close(c)
+}
 
+func WriteDb(db database.Database, c chan *database.Torrent) {
+	count := 0
+	for t := range c {
+		count++
 		db.Add(t)
-
 		if count%1000 == 0 {
 			log.Println("Loaded: ", count)
 		}
 	}
 	log.Println("TOTAL", count)
+}
+
+func Import(file string, db database.Database) {
+	c := make(chan *database.Torrent, 2)
+	go ProduceTorrents(file, c)
+	go WriteDb(db, c)
 }
