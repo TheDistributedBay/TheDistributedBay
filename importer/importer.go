@@ -90,8 +90,12 @@ func CalculateSize(file string) int64 {
 
 	totalRows := int64(0)
 	b := make([]byte, 1024)
-	for n, err := f.Read(b); err != io.EOF; n, err = f.Read(b) {
+	var n int
+	for n, err = gr.Read(b); err == nil; n, err = gr.Read(b) {
 		totalRows += int64(strings.Count(string(b[0:n]), "\n"))
+	}
+	if err != io.EOF {
+		log.Fatal(err)
 	}
 	return totalRows
 }
