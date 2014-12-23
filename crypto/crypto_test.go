@@ -29,3 +29,22 @@ func TestTorrentCreationAndVerify(t *testing.T) {
 		t.Fatal("Hashes are identical")
 	}
 }
+
+func BenchmarkCreate(b *testing.B) {
+	c := time.Now()
+	k, _ := NewKey()
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		CreateTorrent(k, "ml", "n", "d", "cid", c, []string{"foo"})
+	}
+}
+
+func BenchmarkVerify(b *testing.B) {
+	c := time.Now()
+	k, _ := NewKey()
+	t, _ := CreateTorrent(k, "ml", "n", "d", "cid", c, []string{"foo"})
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		VerifyTorrent(t)
+	}
+}
