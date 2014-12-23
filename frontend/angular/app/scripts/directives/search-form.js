@@ -15,17 +15,26 @@ angular.module('theDistributedBayApp')
       },
       controller: function ($scope, $rootScope, $location) {
         $scope.query = $location.search().q;
+        $scope.page = $location.search().p || 0;
         function updateSearch() {
           if ($scope.query) {
             if ($location.path() !== '/search') {
               $location.path('/search');
             }
-            $location.search('q=' + $scope.query);
+            var search = $location.search();
+            search.q = $scope.query;
+            // Strip page if set to zero
+            if (parseInt($scope.page, 10) !== 0) {
+                search.p = $scope.page;
+            } else {
+                delete search.p;
+            }
+            $location.search(search);
           } else {
             $location.search('');
           }
         }
-        $scope.$watch('query', function() {
+        $scope.$watchGroup(['query', 'page'], function() {
           updateSearch();
         });
         $rootScope.$on('$routeChangeSuccess', function (event, current, previous) {

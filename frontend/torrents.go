@@ -3,6 +3,7 @@ package frontend
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/TheDistributedBay/TheDistributedBay/database"
@@ -14,21 +15,28 @@ type TorrentsHandler struct {
 	db database.Database
 }
 
+type TorrentBlob struct {
+	Torrents []*database.Torrent
+	Pages    uint64
+}
+
 func (th TorrentsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query().Get("q")
 	p := 0
 	fmt.Sscan(r.URL.Query().Get("p"), &p)
-	var results []*database.Torrent
-	var err error
+	b := TorrentBlob{}
 	if q != "" {
-		results, _, err = th.s.Search(q, 35*p, 35)
+		results, count, err := th.s.Search(q, 35*p, 35)
 		if err != nil {
+			log.Print(err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
+		b.Torrents = results
+		b.Pages = count / 35
 	}
 
-	js, err := json.Marshal(results)
+	js, err := json.Marshal(b)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
