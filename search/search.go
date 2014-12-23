@@ -2,46 +2,32 @@ package search
 
 import (
 	"log"
-	"os"
-
-	"github.com/blevesearch/bleve"
 
 	"github.com/TheDistributedBay/TheDistributedBay/database"
 )
 
 func NewSearcher(db database.Database) (*Searcher, error) {
-	mapping := bleve.NewIndexMapping()
-	doc := bleve.NewDocumentMapping()
-	ignore := bleve.NewTextFieldMapping()
-	ignore.Index = false
-	ignore.Store = false
-	doc.AddFieldMappingsAt("Hash", ignore)
-	doc.AddFieldMappingsAt("PublicKey", ignore)
-	doc.AddFieldMappingsAt("Signature", ignore)
-	mapping.DefaultMapping = doc
-	os.RemoveAll("search.bleve")
-	index, err := bleve.New("search.bleve", mapping)
+	b, err := NewBleve("search.bleve")
+	b.BatchSize = 100
 	if err != nil {
 		return nil, err
 	}
-	s := &Searcher{index, db}
+	s := &Searcher{b, db}
 	go db.AddClient(s)
 	return s, nil
 }
 
 type Searcher struct {
-	i  bleve.Index
+	b  *Bleve
 	db database.Database
 }
 
 func (s *Searcher) NewTorrent(t *database.Torrent) {
-	s.i.Index(t.Hash, t)
+	s.b.NewBatchedTorrent(t)
 }
 
 func (s *Searcher) Search(term string, from int, size int) ([]*database.Torrent, uint64, error) {
-	q := bleve.NewQueryStringQuery(term)
-	r := bleve.NewSearchRequestOptions(q, size, from, false)
-	result, err := s.i.Search(r)
+	result, err := s.b.Search(term, from, size)
 	if err != nil {
 		return nil, 0, err
 	}
