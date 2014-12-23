@@ -33,7 +33,7 @@ func TestTorrentCreationAndVerify(t *testing.T) {
 	}
 }
 
-func BenchmarkCreate(b *testing.B) {
+func BenchmarkDefaultCreate(b *testing.B) {
 	c := time.Now()
 	k, _ := NewKey()
 	b.ResetTimer()
@@ -42,7 +42,7 @@ func BenchmarkCreate(b *testing.B) {
 	}
 }
 
-func BenchmarkVerify(b *testing.B) {
+func BenchmarkDefaultVerify(b *testing.B) {
 	c := time.Now()
 	k, _ := NewKey()
 	t, _ := CreateTorrent(k, "ml", "n", "d", "cid", c, []string{"foo"})

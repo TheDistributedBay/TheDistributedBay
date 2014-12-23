@@ -9,7 +9,39 @@ import (
 )
 
 func testTorrent(hash string, c time.Time) *database.Torrent {
-	return &database.Torrent{hash, "pk", "sig", "magnetlink", "name", "description", 1, c, []string{"tags"}}
+	return &database.Torrent{hash, "pk", "sig", "magnetlink", hash, "description", 1, c, []string{"tags"}}
+}
+
+func TestBleve(t *testing.T) {
+	bleve, err := NewBleve("search.bleve")
+	if err != nil {
+		t.Fatal(err)
+	}
+	bleve.NewTorrent(testTorrent("foo", time.Now()))
+	r, err := bleve.Search("foo", 0, 10)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if r.Total != 1 {
+		t.Fatal("Unable to find foo")
+	}
+	bleve.NewBatchedTorrent(testTorrent("bar", time.Now()))
+	bleve.Flush()
+	r, err = bleve.Search("bar", 0, 10)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if r.Total != 1 {
+		t.Fatal("Unable to find bar")
+	}
+}
+
+func BenchmarkTorrentCreation(b *testing.B) {
+	c := time.Now()
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		testTorrent(fmt.Sprint(i), c)
+	}
 }
 
 func BenchmarkNormalBleve(b *testing.B) {
