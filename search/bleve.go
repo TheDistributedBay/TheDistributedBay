@@ -29,7 +29,7 @@ func NewBleve(f string) (*Bleve, error) {
 	if err != nil {
 		return nil, err
 	}
-	b := &Bleve{index, bleve.NewBatch(), 10}
+	b := &Bleve{index, bleve.NewBatch(), 100}
 	return b, nil
 }
 
