@@ -9,6 +9,8 @@ import (
 	"github.com/TheDistributedBay/TheDistributedBay/database"
 )
 
+const file = "index.bleve"
+
 func NewSearcher(db database.Database) (*Searcher, error) {
 	mapping := bleve.NewIndexMapping()
 	doc := bleve.NewDocumentMapping()
@@ -19,8 +21,8 @@ func NewSearcher(db database.Database) (*Searcher, error) {
 	doc.AddFieldMappingsAt("PublicKey", ignore)
 	doc.AddFieldMappingsAt("Signature", ignore)
 	mapping.DefaultMapping = doc
-	os.RemoveAll("search.bleve")
-	index, err := bleve.New("search.bleve", mapping)
+	os.RemoveAll(file)
+	index, err := bleve.New(file, mapping)
 	if err != nil {
 		return nil, err
 	}
