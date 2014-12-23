@@ -17,7 +17,9 @@ angular.module('theDistributedBayApp')
         $scope.query = $location.search().q;
         function updateSearch() {
           if ($scope.query) {
-            $location.path('/search');
+            if ($location.path() !== '/search') {
+              $location.path('/search');
+            }
             $location.search('q=' + $scope.query);
           } else {
             $location.search('');
@@ -28,9 +30,11 @@ angular.module('theDistributedBayApp')
         });
         $rootScope.$on('$routeChangeSuccess', function (event, current, previous) {
           if (current.originalPath === "/") {
-            $('search-form.form-small').hide();
-          } else {
-            $('search-form.form-small').show();
+            $('.form-small').removeClass('form-small').addClass('form-big');
+            $('.index-wrapper .index:not(.container)').addClass('container')
+          } else if (previous && previous.originalPath === "/") {
+            $('.form-big').removeClass('form-big').addClass('form-small');
+            $('.index-wrapper .index.container').removeClass('container')
           }
         });
       }

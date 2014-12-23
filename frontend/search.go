@@ -39,6 +39,7 @@ func (tc TorrentClient) NewTorrent(t *database.Torrent) {
 func (tc TorrentClient) Search(queryStr string) (*bleve.SearchResult, error) {
 	query := bleve.NewQueryStringQuery(queryStr)
 	searchRequest := bleve.NewSearchRequest(query)
+	searchRequest.Size = 50
 	result, err := tc.Index.Search(searchRequest)
 	if err != nil {
 		return nil, err

@@ -30,7 +30,7 @@ func main() {
 		if err != nil {
 			log.Fatalf("Error trying to connect to %v : %v", *connect, err)
 		}
-		cm.Handle(tls.Wrap(c))
+		cm.Handle(c)
 	} else {
 		l, err := tls.Listen(*listen)
 		if err != nil {

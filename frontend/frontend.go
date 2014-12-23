@@ -8,11 +8,16 @@ import (
 	"github.com/TheDistributedBay/TheDistributedBay/database"
 	"github.com/gorilla/mux"
 	"log"
+	"mime"
 	"net/http"
 	"os"
 )
 
-func Serve(http_address *string, db database.Database) {
+func Serve(httpAddress *string, db database.Database) {
+
+	// Add SVG to mime directory
+	mime.AddExtensionType(".svg", "image/svg+xml")
+
 	r := mux.NewRouter()
 
 	r.PathPrefix("/api/").Handler(ApiRouter(db))
@@ -29,7 +34,8 @@ func Serve(http_address *string, db database.Database) {
 			"frontend/angular/dist/index.html"})
 	}
 	http.Handle("/", r)
-	err := http.ListenAndServe(*http_address, nil)
+	log.Println("Web server listening on", *httpAddress)
+	err := http.ListenAndServe(*httpAddress, nil)
 	if err != nil {
 		log.Println(err)
 	}
