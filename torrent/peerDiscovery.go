@@ -30,6 +30,7 @@ func DiscoverPeers(cm *network.ConnectionManager, address string) {
 
 	config := dht.NewConfig()
 	config.Port = port
+	config.NumTargetPeers = 10
 	node, err := dht.New(config)
 	if err != nil {
 		log.Fatal("Error creating DHT node!")
