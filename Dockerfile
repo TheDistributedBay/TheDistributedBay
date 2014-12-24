@@ -2,7 +2,7 @@ FROM debian:wheezy
 MAINTAINER Tristan Rice, rice@fn.lc
 
 RUN apt-get update -y
-RUN apt-get install -y golang git mercurial
+RUN apt-get install -y golang golang-src git mercurial
 
 ENV GOPATH /srv/go
 
