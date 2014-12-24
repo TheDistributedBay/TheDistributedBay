@@ -28,7 +28,10 @@ func main() {
 	devAssets := flag.Bool("devassets", false, "Tells the front end to serve development assests instead of the precompiled production ones.")
 	flag.Parse()
 
-	db := database.NewTorrentDB()
+	db, err := database.NewTorrentDB("torrent.db")
+	if err != nil {
+		log.Fatal("Error opening torrent database", err)
+	}
 	cm := network.NewConnectionManager(db)
 
 	if *connect != "" {

@@ -23,6 +23,14 @@ type MerkleNode struct {
 	r    *MerkleNode
 }
 
+func (s Signature) Hash() string {
+	m := sha512.New()
+	m.Write(s.R.Bytes())
+	m.Write(s.S.Bytes())
+	return string(m.Sum(nil))
+
+}
+
 func SignTorrents(k *ecdsa.PrivateKey, ts []*Torrent) (*Signature, error) {
 	m := buildMerkle(ts)
 	R, S, err := ecdsa.Sign(rand.Reader, k, []byte(m.hash))

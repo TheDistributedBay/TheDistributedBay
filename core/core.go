@@ -7,7 +7,7 @@ type TorrentWriter interface {
 
 type Database interface {
 	Get(hash string) (*Torrent, error)
-	Add(t *Torrent)
+	Add(t *Torrent) error
 	AddSignature(s *Signature)
 	List() []string
 	AddClient(w TorrentWriter)
