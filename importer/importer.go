@@ -97,7 +97,7 @@ func WriteDbSignature(db core.Database, d chan *core.Torrent, totalRows int64) {
 		}
 		db.AddSignature(s)
 		if count%10000 == 0 {
-			eta := time.Now().Sub(start) * time.Duration(totalRows) / time.Duration(count)
+			eta := time.Now().Sub(start) / time.Duration(count) * time.Duration(totalRows)
 			log.Println("Signed: ", count, "of", totalRows, "(ETA:", eta.String()+")")
 		}
 	}
