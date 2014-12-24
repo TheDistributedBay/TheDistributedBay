@@ -28,7 +28,6 @@ type sewer struct {
 }
 
 func (s *sewer) Close() error {
-	s.r.Close()
 	s.w.Close()
 	return nil
 }

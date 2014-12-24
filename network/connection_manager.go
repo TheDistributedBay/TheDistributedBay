@@ -54,7 +54,9 @@ func (m *ConnectionManager) Handle(c Connection) {
 func (m *ConnectionManager) Close() error {
 	for _, c := range m.chs {
 		err := c.Close()
-		log.Printf("Closing %v got %v", c, err)
+		if err != nil {
+			log.Printf("Closing %v got %v", c, err)
+		}
 	}
 	if m.l != nil {
 		m.l.Close()

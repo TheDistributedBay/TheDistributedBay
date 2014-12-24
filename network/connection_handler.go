@@ -1,6 +1,7 @@
 package network
 
 import (
+	"io"
 	"log"
 	"sync"
 
@@ -39,7 +40,9 @@ func (h *ConnectionHandler) shovel() {
 	for {
 		msg, err := h.t.Read()
 		if err != nil {
-			log.Printf("Error for %v : %v", h.t, err)
+			if err != io.EOF {
+				log.Printf("Error for %v : %v", h.t, err)
+			}
 			return
 		}
 		switch msg.Code {
