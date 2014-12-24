@@ -8,8 +8,12 @@ import (
 	"github.com/TheDistributedBay/TheDistributedBay/database"
 )
 
-func testTorrent(hash string, c time.Time) *database.Torrent {
-	return &database.Torrent{hash, "pk", "sig", "magnetlink", hash, "description", 1, c, []string{"tags"}}
+func testTorrent(i string, c time.Time) *database.Torrent {
+	return simpleTorrent(i, i, i, c)
+}
+
+func simpleTorrent(hash, name, description string, c time.Time) *database.Torrent {
+	return &database.Torrent{hash, "pk", "sig", "magnetlink", name, description, 1, c, []string{"tags"}}
 }
 
 func TestBleve(t *testing.T) {
@@ -17,7 +21,7 @@ func TestBleve(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	bleve.NewTorrent(testTorrent("foo", time.Now()))
+	bleve.NewTorrent(simpleTorrent("t1", "foo", "", time.Now()))
 	r, err := bleve.Search("foo", 0, 10)
 	if err != nil {
 		t.Fatal(err)
@@ -25,7 +29,7 @@ func TestBleve(t *testing.T) {
 	if r.Total != 1 {
 		t.Fatal("Unable to find foo")
 	}
-	bleve.NewBatchedTorrent(testTorrent("bar", time.Now()))
+	bleve.NewBatchedTorrent(simpleTorrent("t2", "bar", "", time.Now()))
 	bleve.Flush()
 	r, err = bleve.Search("bar", 0, 10)
 	if err != nil {
