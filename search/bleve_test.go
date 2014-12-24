@@ -38,6 +38,16 @@ func TestBleve(t *testing.T) {
 	if r.Total != 1 {
 		t.Fatal("Unable to find bar")
 	}
+	// Double index see what happens
+	bleve.NewBatchedTorrent(simpleTorrent("t2", "bar", "", time.Now()))
+	bleve.Flush()
+	r, err = bleve.Search("bar", 0, 10)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if r.Total != 1 {
+		t.Fatal("Double indexed")
+	}
 }
 
 func BenchmarkTorrentCreation(b *testing.B) {
