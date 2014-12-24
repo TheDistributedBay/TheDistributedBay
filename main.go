@@ -5,6 +5,7 @@ import (
 	"log"
 	"runtime"
 
+	_ "expvar"
 	_ "net/http/pprof"
 
 	"github.com/TheDistributedBay/TheDistributedBay/database"
@@ -18,6 +19,7 @@ import (
 
 func main() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
+	log.SetFlags(Lshortfile | lstdFlags)
 
 	listen := flag.String("listen", ":7654", "Address to listen on")
 	connect := flag.String("connect", "", "Address to connect to")
