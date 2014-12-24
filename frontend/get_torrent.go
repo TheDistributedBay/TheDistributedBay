@@ -2,8 +2,8 @@ package frontend
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
+	"time"
 
 	"github.com/TheDistributedBay/TheDistributedBay/core"
 )
@@ -12,9 +12,14 @@ type GetTorrentHandler struct {
 	db core.Database
 }
 
+type torrentResult struct {
+	Name, MagnetLink, Hash, InfoHash, Category string
+	CreatedAt                                  time.Time
+	Seeders, Leechers, Completed               int
+}
+
 func (th GetTorrentHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	hash := r.URL.Query().Get("hash")
-	log.Println("HASH", hash)
 	if hash == "" {
 		http.Error(w, "Invalid request.", http.StatusBadRequest)
 		return
@@ -26,7 +31,16 @@ func (th GetTorrentHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	js, err := json.Marshal(torrent)
+	result := torrentResult{
+		Name:       torrent.Name,
+		MagnetLink: torrent.MagnetLink(),
+		Hash:       torrent.Hash,
+		InfoHash:   torrent.NiceInfoHash(),
+		Category:   torrent.Category(),
+		CreatedAt:  torrent.CreatedAt,
+	}
+
+	js, err := json.Marshal(result)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

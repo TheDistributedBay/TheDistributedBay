@@ -3,7 +3,7 @@ package importer
 import (
 	"compress/gzip"
 	"encoding/csv"
-	"fmt"
+	"encoding/hex"
 	"html"
 	"io"
 	"log"
@@ -39,14 +39,20 @@ func ProduceTorrents(file string, c chan *core.Torrent, d chan *core.Torrent) {
 		}
 
 		name := html.UnescapeString(rec[0])
-		//created := rec[1]
-		magnet := fmt.Sprintf("magnet:?xt=urn:btih:%s", rec[2])
+
+		created := time.Now()
+
+		infoHash, err := hex.DecodeString(rec[2])
+		if err != nil {
+			log.Print(err)
+			continue
+		}
 
 		category := rec[4]
 		//seeder := rec[5]
 		//leecher := rec[6]
 
-		t := core.CreateTorrent(magnet, name, "from db dump", category, time.Now(), nil)
+		t := core.CreateTorrent(infoHash, name, "from db dump", category, created, nil)
 		if err != nil {
 			log.Print(err)
 			continue
