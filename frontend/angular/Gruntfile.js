@@ -403,7 +403,7 @@ module.exports = function (grunt) {
       'wiredep',
       'concurrent:server',
       'autoprefixer',
-      'connect:livereload',
+      //'connect:livereload',
       'watch'
     ]);
   });
