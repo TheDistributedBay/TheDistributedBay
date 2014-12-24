@@ -41,7 +41,8 @@ angular
       })
       .when('/search', {
         templateUrl: 'views/search.html',
-        controller: 'SearchCtrl'
+        controller: 'SearchCtrl',
+        reloadOnSearch: false
       })
       .when('/torrent/:hash/?:name?', {
         templateUrl: 'views/torrent/view.html',

@@ -34,6 +34,9 @@ func (th TorrentsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 		b.Torrents = results
 		b.Pages = count / 35
+    if count % 35 > 0 {
+      b.Pages += 1
+    }
 	}
 
 	js, err := json.Marshal(b)

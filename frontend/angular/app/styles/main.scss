@@ -70,10 +70,10 @@ a:not[href="/"] {
 }
 .torrents {
   text-align: center;
-  & > a, th {
+  & > a, th, .pages a {
     @include text-shadow;
   }
-  & > a {
+  & > a, .pages a {
     @include dotted-link;
   }
   .table-torrents {
@@ -88,6 +88,21 @@ a:not[href="/"] {
     tbody {
       background-color: white;
       box-shadow: 1px 1px 2px rgba(0,0,0,0.25);
+    }
+    -webkit-transition: opacity 0.5s;
+    transition: opacity 0.5s;
+    &.loading {
+      opacity: 0.7
+    }
+  }
+  .pages {
+    margin-bottom: 20px;
+    a {
+      margin: 0 3px;
+
+      &.active {
+        font-weight: bold;
+      }
     }
   }
 }
