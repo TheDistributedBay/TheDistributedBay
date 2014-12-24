@@ -7,16 +7,16 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/TheDistributedBay/TheDistributedBay/database"
+	"github.com/TheDistributedBay/TheDistributedBay/core"
 )
 
 type AddTorrentHandler struct {
-	db database.Database
+	db core.Database
 }
 
 func (th AddTorrentHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
-	var t database.Torrent
+	var t core.Torrent
 	err := decoder.Decode(&t)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)

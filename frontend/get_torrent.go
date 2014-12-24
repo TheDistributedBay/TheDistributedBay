@@ -5,11 +5,11 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/TheDistributedBay/TheDistributedBay/database"
+	"github.com/TheDistributedBay/TheDistributedBay/core"
 )
 
 type GetTorrentHandler struct {
-	db database.Database
+	db core.Database
 }
 
 func (th GetTorrentHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {

@@ -5,7 +5,7 @@ import (
 
 	"github.com/blevesearch/bleve"
 
-	"github.com/TheDistributedBay/TheDistributedBay/database"
+	"github.com/TheDistributedBay/TheDistributedBay/core"
 )
 
 type Bleve struct {
@@ -31,11 +31,11 @@ func NewBleve(f string) (*Bleve, error) {
 	return b, nil
 }
 
-func (b *Bleve) NewTorrent(t *database.Torrent) {
+func (b *Bleve) NewTorrent(t *core.Torrent) {
 	b.i.Index(t.Hash, t)
 }
 
-func (b *Bleve) NewBatchedTorrent(t *database.Torrent) {
+func (b *Bleve) NewBatchedTorrent(t *core.Torrent) {
 	b.b.Index(t.Hash, t)
 	if b.b.Size() > b.BatchSize {
 		b.i.Batch(b.b)

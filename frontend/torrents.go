@@ -6,17 +6,17 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/TheDistributedBay/TheDistributedBay/database"
+	"github.com/TheDistributedBay/TheDistributedBay/core"
 	"github.com/TheDistributedBay/TheDistributedBay/search"
 )
 
 type TorrentsHandler struct {
 	s  *search.Searcher
-	db database.Database
+	db core.Database
 }
 
 type TorrentBlob struct {
-	Torrents []*database.Torrent
+	Torrents []*core.Torrent
 	Pages    uint64
 }
 

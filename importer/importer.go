@@ -12,7 +12,6 @@ import (
 
 	"github.com/TheDistributedBay/TheDistributedBay/core"
 	"github.com/TheDistributedBay/TheDistributedBay/crypto"
-	"github.com/TheDistributedBay/TheDistributedBay/database"
 )
 
 func ProduceTorrents(file string, c chan *core.Torrent, d chan *core.Torrent) {
@@ -58,7 +57,7 @@ func ProduceTorrents(file string, c chan *core.Torrent, d chan *core.Torrent) {
 	close(d)
 }
 
-func WriteDbTorrent(db database.Database, c chan *core.Torrent, totalRows int64) {
+func WriteDbTorrent(db core.Database, c chan *core.Torrent, totalRows int64) {
 	start := time.Now()
 	count := int64(0)
 	for t := range c {
@@ -71,7 +70,7 @@ func WriteDbTorrent(db database.Database, c chan *core.Torrent, totalRows int64)
 	}
 }
 
-func WriteDbSignature(db database.Database, d chan *core.Torrent, totalRows int64) {
+func WriteDbSignature(db core.Database, d chan *core.Torrent, totalRows int64) {
 	start := time.Now()
 	count := int64(0)
 	open := true
@@ -124,7 +123,7 @@ func CalculateSize(file string) int64 {
 	return totalRows
 }
 
-func Import(file string, db database.Database) {
+func Import(file string, db core.Database) {
 	c := make(chan *core.Torrent, 2)
 	d := make(chan *core.Torrent, 200)
 	log.Print("Calculating size")

@@ -5,17 +5,17 @@ import (
 	"log"
 	"sync"
 
-	"github.com/TheDistributedBay/TheDistributedBay/database"
+	"github.com/TheDistributedBay/TheDistributedBay/core"
 )
 
 type ConnectionHandler struct {
 	t           *Transcoder
-	db          database.Database
+	db          core.Database
 	torrentList map[string]struct{}
 	lock        *sync.RWMutex
 }
 
-func NewConnectionHandler(t *Transcoder, db database.Database) *ConnectionHandler {
+func NewConnectionHandler(t *Transcoder, db core.Database) *ConnectionHandler {
 	h := &ConnectionHandler{t, db, nil, &sync.RWMutex{}}
 
 	m := make(map[string]struct{})
@@ -27,15 +27,15 @@ func NewConnectionHandler(t *Transcoder, db database.Database) *ConnectionHandle
 	return h
 }
 
-func (h *ConnectionHandler) NewTorrent(t *database.Torrent) {
+func (h *ConnectionHandler) NewTorrent(t *core.Torrent) {
 	h.lock.RLock()
 	defer h.lock.RUnlock()
 	if _, seen := h.torrentList[t.Hash]; !seen {
-		h.t.Write(Message{"Torrents", nil, []*database.Torrent{t}})
+		h.t.Write(Message{"Torrents", nil, []*core.Torrent{t}})
 	}
 }
 
-func (h *ConnectionHandler) NewSignature(s *database.Signature) {}
+func (h *ConnectionHandler) NewSignature(s *core.Signature) {}
 
 // Shovels torrents into the db
 func (h *ConnectionHandler) shovel() {

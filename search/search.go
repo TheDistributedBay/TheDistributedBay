@@ -3,10 +3,10 @@ package search
 import (
 	"log"
 
-	"github.com/TheDistributedBay/TheDistributedBay/database"
+	"github.com/TheDistributedBay/TheDistributedBay/core"
 )
 
-func NewSearcher(db database.Database) (*Searcher, error) {
+func NewSearcher(db core.Database) (*Searcher, error) {
 	b, err := NewBleve("search.bleve")
 	if err != nil {
 		return nil, err
@@ -19,21 +19,21 @@ func NewSearcher(db database.Database) (*Searcher, error) {
 
 type Searcher struct {
 	b  *Bleve
-	db database.Database
+	db core.Database
 }
 
-func (s *Searcher) NewTorrent(t *database.Torrent) {
+func (s *Searcher) NewTorrent(t *core.Torrent) {
 	s.b.NewBatchedTorrent(t)
 }
 
-func (s *Searcher) NewSignature(*database.Signature) {}
+func (s *Searcher) NewSignature(*core.Signature) {}
 
-func (s *Searcher) Search(term string, from int, size int) ([]*database.Torrent, uint64, error) {
+func (s *Searcher) Search(term string, from int, size int) ([]*core.Torrent, uint64, error) {
 	result, err := s.b.Search(term, from, size)
 	if err != nil {
 		return nil, 0, err
 	}
-	torrents := make([]*database.Torrent, 0, len(result.Hits))
+	torrents := make([]*core.Torrent, 0, len(result.Hits))
 	for _, e := range result.Hits {
 		t, err := s.db.Get(e.ID)
 		if err != nil {
