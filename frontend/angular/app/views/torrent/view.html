@@ -1,9 +1,9 @@
-<h1><a href="/torrent/6099470/Pinguy-OS-12-04-shell-i686-iso" class="link-textcolor vm">{{torrent.Name}}</a></h1>
+<h1><a href="/torrent/{{torrent.Hash}}/{{sanitize(torrent.Name)}}" class="link-textcolor vm">{{torrent.Name}}</a></h1>
 <div id="details">
   <table>
     <tr>
       <th>Type:</th>
-      <td><a href="/search?category={{torrent.CategoryID}}">{{torrent.CategoryID}}</a></td>
+      <td><a href="/search?category={{torrent.Category}}">{{torrent.Category}}</a></td>
     </tr>
     <tr>
       <th>Files:</th>
@@ -22,8 +22,12 @@
     <td>{{torrent.Leechers}}</td>
     </tr>
     <tr>
+    <th>Completed:</th>
+    <td>{{torrent.Leechers}}</td>
+    </tr>
+    <tr>
       <th>Info Hash:</th>
-      <td>{{torrent.Hash}}</td>
+      <td>{{torrent.InfoHash}}</td>
     </tr>
   </table>
   <div class="torpicture" style="width: 150px; float: right;"></div>

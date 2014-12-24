@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/TheDistributedBay/TheDistributedBay/core"
 	"github.com/TheDistributedBay/TheDistributedBay/search"
@@ -15,8 +16,13 @@ type TorrentsHandler struct {
 	db core.Database
 }
 
+type searchResult struct {
+	Name, MagnetLink, Hash, Category string
+	CreatedAt                        time.Time
+}
+
 type TorrentBlob struct {
-	Torrents []*core.Torrent
+	Torrents []searchResult
 	Pages    uint64
 }
 
@@ -32,7 +38,16 @@ func (th TorrentsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		b.Torrents = results
+		b.Torrents = make([]searchResult, len(results))
+		for i, result := range results {
+			b.Torrents[i] = searchResult{
+				Name:       result.Name,
+				MagnetLink: result.MagnetLink(),
+				Hash:       result.Hash,
+				Category:   result.Category(),
+				CreatedAt:  result.CreatedAt,
+			}
+		}
 		b.Pages = count / 35
 		if count%35 > 0 {
 			b.Pages += 1
