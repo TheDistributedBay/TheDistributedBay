@@ -10,11 +10,12 @@ import (
 	"strings"
 	"time"
 
+	"github.com/TheDistributedBay/TheDistributedBay/core"
 	"github.com/TheDistributedBay/TheDistributedBay/crypto"
 	"github.com/TheDistributedBay/TheDistributedBay/database"
 )
 
-func ProduceTorrents(file string, c chan *database.Torrent, d chan *database.Torrent) {
+func ProduceTorrents(file string, c chan *core.Torrent, d chan *core.Torrent) {
 	log.Println("Reading database dump from:", file)
 	f, err := os.Open(file)
 	if err != nil {
@@ -45,7 +46,7 @@ func ProduceTorrents(file string, c chan *database.Torrent, d chan *database.Tor
 		//seeder := rec[5]
 		//leecher := rec[6]
 
-		t := database.CreateTorrent(magnet, name, "from db dump", category, time.Now(), nil)
+		t := core.CreateTorrent(magnet, name, "from db dump", category, time.Now(), nil)
 		if err != nil {
 			log.Print(err)
 			continue
@@ -57,7 +58,7 @@ func ProduceTorrents(file string, c chan *database.Torrent, d chan *database.Tor
 	close(d)
 }
 
-func WriteDbTorrent(db database.Database, c chan *database.Torrent, totalRows int64) {
+func WriteDbTorrent(db database.Database, c chan *core.Torrent, totalRows int64) {
 	start := time.Now()
 	count := int64(0)
 	for t := range c {
@@ -70,11 +71,11 @@ func WriteDbTorrent(db database.Database, c chan *database.Torrent, totalRows in
 	}
 }
 
-func WriteDbSignature(db database.Database, d chan *database.Torrent, totalRows int64) {
+func WriteDbSignature(db database.Database, d chan *core.Torrent, totalRows int64) {
 	start := time.Now()
 	count := int64(0)
 	open := true
-	b := make([]*database.Torrent, 0)
+	b := make([]*core.Torrent, 0)
 	k, err := crypto.NewKey()
 	if err != nil {
 		panic(err)
@@ -82,12 +83,12 @@ func WriteDbSignature(db database.Database, d chan *database.Torrent, totalRows 
 	for open {
 		b = b[:0]
 		for i := 0; i < 100 && open; i++ {
-			var t *database.Torrent
+			var t *core.Torrent
 			t, open = <-d
 			b = append(b, t)
 		}
 		count += int64(len(b))
-		s, err := database.SignTorrents(k, b)
+		s, err := core.SignTorrents(k, b)
 		if err != nil {
 			panic(err)
 		}
@@ -124,8 +125,8 @@ func CalculateSize(file string) int64 {
 }
 
 func Import(file string, db database.Database) {
-	c := make(chan *database.Torrent, 2)
-	d := make(chan *database.Torrent, 200)
+	c := make(chan *core.Torrent, 2)
+	d := make(chan *core.Torrent, 200)
 	log.Print("Calculating size")
 	totalRows := CalculateSize(file)
 	log.Print("Done")
