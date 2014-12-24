@@ -13,6 +13,7 @@ import (
 	"github.com/TheDistributedBay/TheDistributedBay/network"
 	"github.com/TheDistributedBay/TheDistributedBay/stats"
 	"github.com/TheDistributedBay/TheDistributedBay/tls"
+	"github.com/TheDistributedBay/TheDistributedBay/torrent"
 )
 
 func main() {
@@ -47,6 +48,7 @@ func main() {
 	}
 
 	go stats.ReportStats(db, cm)
+	go torrent.DiscoverPeers(cm)
 
 	log.Println("Running...")
 	frontend.Serve(httpAddress, db, *devAssets)

@@ -30,7 +30,7 @@ func TestTorrentInfoRetrevial(t *testing.T) {
 		if info.InfoHash != infoHashes[i] {
 			t.Fatal("Produced info hash does not match inputted one.")
 		}
-		if info.Seeders == 0 && info.Leechers == 0 && info.Completed == 0 {
+		if info.Seeders.Min == 0 && info.Leechers.Min == 0 && info.Completed.Min == 0 {
 			t.Fatal("Returned details has zero values.", info, details)
 		}
 	}
@@ -50,7 +50,7 @@ func TestTorrentInfoFallback(t *testing.T) {
 	if details[0].InfoHash != infoHashes[0] {
 		t.Fatal("Produced info hash does not match inputted one.")
 	}
-	if details[0].Seeders == 0 || details[0].Leechers == 0 || details[0].Completed == 0 {
+	if details[0].Seeders.Min == 0 || details[0].Leechers.Min == 0 || details[0].Completed.Min == 0 {
 		t.Fatal("Returned details has a zero value.")
 	}
 }
