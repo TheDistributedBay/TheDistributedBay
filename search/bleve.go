@@ -22,8 +22,8 @@ func NewBleve(f string) (*Bleve, error) {
 	doc.AddFieldMappingsAt("Name", field)
 	doc.AddFieldMappingsAt("Description", field)
 	mapping.DefaultMapping = doc
-	os.RemoveAll("search.bleve")
-	index, err := bleve.New("search.bleve", mapping)
+	os.RemoveAll(f)
+	index, err := bleve.New(f, mapping)
 	if err != nil {
 		return nil, err
 	}

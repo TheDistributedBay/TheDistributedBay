@@ -17,7 +17,7 @@ func simpleTorrent(hash, name, description string, c time.Time) *core.Torrent {
 }
 
 func TestBleve(t *testing.T) {
-	bleve, err := NewBleve("search.bleve")
+	bleve, err := NewBleve("test.bleve")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -59,7 +59,7 @@ func BenchmarkTorrentCreation(b *testing.B) {
 }
 
 func BenchmarkNormalBleve(b *testing.B) {
-	bleve, _ := NewBleve("search.bleve")
+	bleve, _ := NewBleve("test.bleve")
 	c := time.Now()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
@@ -68,7 +68,7 @@ func BenchmarkNormalBleve(b *testing.B) {
 }
 
 func BenchmarkBatchBleve10(b *testing.B) {
-	bleve, _ := NewBleve("search.bleve")
+	bleve, _ := NewBleve("test.bleve")
 	bleve.BatchSize = 10
 	c := time.Now()
 	b.ResetTimer()
@@ -79,7 +79,7 @@ func BenchmarkBatchBleve10(b *testing.B) {
 }
 
 func BenchmarkBatchBleve50(b *testing.B) {
-	bleve, _ := NewBleve("search.bleve")
+	bleve, _ := NewBleve("test.bleve")
 	bleve.BatchSize = 50
 	c := time.Now()
 	b.ResetTimer()
@@ -90,7 +90,7 @@ func BenchmarkBatchBleve50(b *testing.B) {
 }
 
 func BenchmarkBatchBleve100(b *testing.B) {
-	bleve, _ := NewBleve("search.bleve")
+	bleve, _ := NewBleve("test.bleve")
 	bleve.BatchSize = 100
 	c := time.Now()
 	b.ResetTimer()
@@ -101,7 +101,7 @@ func BenchmarkBatchBleve100(b *testing.B) {
 }
 
 func BenchmarkBatchBleve200(b *testing.B) {
-	bleve, _ := NewBleve("search.bleve")
+	bleve, _ := NewBleve("test.bleve")
 	bleve.BatchSize = 200
 	c := time.Now()
 	b.ResetTimer()
@@ -112,7 +112,7 @@ func BenchmarkBatchBleve200(b *testing.B) {
 }
 
 func BenchmarkBatchBleve500(b *testing.B) {
-	bleve, _ := NewBleve("search.bleve")
+	bleve, _ := NewBleve("test.bleve")
 	bleve.BatchSize = 500
 	c := time.Now()
 	b.ResetTimer()
@@ -123,7 +123,7 @@ func BenchmarkBatchBleve500(b *testing.B) {
 }
 
 func BenchmarkBatchBleve1000(b *testing.B) {
-	bleve, _ := NewBleve("search.bleve")
+	bleve, _ := NewBleve("test.bleve")
 	bleve.BatchSize = 1000
 	c := time.Now()
 	b.ResetTimer()
