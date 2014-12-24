@@ -48,7 +48,7 @@ func main() {
 	}
 
 	go stats.ReportStats(db, cm)
-	go torrent.DiscoverPeers(cm)
+	go torrent.DiscoverPeers(cm, *listen)
 
 	log.Println("Running...")
 	frontend.Serve(httpAddress, db, *devAssets)
