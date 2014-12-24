@@ -5,21 +5,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/TheDistributedBay/TheDistributedBay/crypto"
 	"github.com/TheDistributedBay/TheDistributedBay/database"
 	"github.com/TheDistributedBay/TheDistributedBay/tls"
 )
 
 func createDefaultTorrent(d string) *database.Torrent {
-	k, err := crypto.NewKey()
-	if err != nil {
-		panic(err)
-	}
-	t, err := crypto.CreateTorrent(k, "magnetlink", "name", d, "category", time.Now(), nil)
-	if err != nil {
-		panic(err)
-	}
-	return t
+	return database.CreateTorrent("magnetlink", "name", d, "category", time.Now(), nil)
 }
 
 type sewer struct {
@@ -49,6 +40,8 @@ type dummyListener chan *database.Torrent
 func (d *dummyListener) NewTorrent(t *database.Torrent) {
 	*d <- t
 }
+
+func (d *dummyListener) NewSignature(s *database.Signature) {}
 
 func testSewer() (*sewer, *sewer) {
 	pr1, pw1 := io.Pipe()

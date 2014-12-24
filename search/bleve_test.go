@@ -13,7 +13,7 @@ func testTorrent(i string, c time.Time) *database.Torrent {
 }
 
 func simpleTorrent(hash, name, description string, c time.Time) *database.Torrent {
-	return &database.Torrent{hash, "pk", "sig", "magnetlink", name, description, 1, c, []string{"tags"}}
+	return &database.Torrent{hash, "magnetlink", name, description, 1, c, []string{"tags"}}
 }
 
 func TestBleve(t *testing.T) {

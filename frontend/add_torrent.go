@@ -24,11 +24,7 @@ func (th AddTorrentHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	t.CreatedAt = time.Now()
-
-	// TODO set public key, signature, hash
-	t.PublicKey = "wub a dub a blub blub"
-	t.Signature = "sign me please!"
-	t.Hash = randomStr()
+	t.CalculateHash()
 
 	th.db.Add(&t)
 
