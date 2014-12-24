@@ -7,23 +7,27 @@ import (
 
 type TorrentWriter interface {
 	NewTorrent(t *Torrent)
+	NewSignature(s *Signature)
 }
 
 type Database interface {
 	Get(hash string) (*Torrent, error)
 	Add(t *Torrent)
+	AddSignature(s *Signature)
 	List() []string
 	AddClient(w TorrentWriter)
 }
 type TorrentDB struct {
-	torrents map[string]*Torrent
-	writers  []TorrentWriter
-	lock     *sync.RWMutex
+	torrents   map[string]*Torrent
+	signatures map[string][]*Signature
+	writers    []TorrentWriter
+	lock       *sync.RWMutex
 }
 
 func NewTorrentDB() *TorrentDB {
 	t := make(map[string]*Torrent)
-	return &TorrentDB{t, nil, &sync.RWMutex{}}
+	s := make(map[string][]*Signature)
+	return &TorrentDB{t, s, nil, &sync.RWMutex{}}
 }
 
 func (db *TorrentDB) NumTorrents() int {
@@ -56,6 +60,24 @@ func (db *TorrentDB) Add(t *Torrent) {
 	for _, w := range db.writers {
 		go func() {
 			w.NewTorrent(t)
+			wg.Done()
+		}()
+	}
+	wg.Wait()
+}
+
+func (db *TorrentDB) AddSignature(s *Signature) {
+	db.lock.Lock()
+	defer db.lock.Unlock()
+	for _, t := range s.ListTorrents() {
+		db.signatures[t] = append(db.signatures[t], s)
+	}
+
+	wg := &sync.WaitGroup{}
+	wg.Add(len(db.writers))
+	for _, w := range db.writers {
+		go func() {
+			w.NewSignature(s)
 			wg.Done()
 		}()
 	}

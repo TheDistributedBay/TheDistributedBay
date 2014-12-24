@@ -45,6 +45,8 @@ func (m *ConnectionManager) Listen(l net.Listener) {
 func (m *ConnectionManager) Handle(c Connection) {
 	if c.Protocol() != tls.Proto {
 		log.Printf("Unrecognized proto on %v : %v", c, c.Protocol())
+		c.Close()
+		return
 	}
 	t := NewTranscoder(c)
 	ch := NewConnectionHandler(t, m.db)

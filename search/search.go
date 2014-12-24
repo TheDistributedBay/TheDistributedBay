@@ -6,8 +6,6 @@ import (
 	"github.com/TheDistributedBay/TheDistributedBay/database"
 )
 
-const file = "index.bleve"
-
 func NewSearcher(db database.Database) (*Searcher, error) {
 	b, err := NewBleve("search.bleve")
 	if err != nil {
@@ -27,6 +25,8 @@ type Searcher struct {
 func (s *Searcher) NewTorrent(t *database.Torrent) {
 	s.b.NewBatchedTorrent(t)
 }
+
+func (s *Searcher) NewSignature(*database.Signature) {}
 
 func (s *Searcher) Search(term string, from int, size int) ([]*database.Torrent, uint64, error) {
 	result, err := s.b.Search(term, from, size)

@@ -1,4 +1,4 @@
-package crypto
+package database
 
 import (
 	"crypto/ecdsa"
@@ -8,11 +8,11 @@ import (
 	"io"
 	"math/big"
 
-	"github.com/TheDistributedBay/TheDistributedBay/database"
+	"github.com/TheDistributedBay/TheDistributedBay/crypto"
 )
 
 type Signature struct {
-	Key  *EncodedKey
+	Key  *crypto.EncodedKey
 	R, S *big.Int
 	M    *MerkleNode
 }
@@ -23,13 +23,13 @@ type MerkleNode struct {
 	r    *MerkleNode
 }
 
-func SignTorrents(k *ecdsa.PrivateKey, ts []*database.Torrent) (*Signature, error) {
+func SignTorrents(k *ecdsa.PrivateKey, ts []*Torrent) (*Signature, error) {
 	m := buildMerkle(ts)
 	R, S, err := ecdsa.Sign(rand.Reader, k, []byte(m.hash))
 	if err != nil {
 		return nil, err
 	}
-	ek := encodeKey(&k.PublicKey)
+	ek := crypto.EncodeKey(&k.PublicKey)
 	return &Signature{ek, R, S, m}, nil
 }
 
@@ -38,7 +38,7 @@ func (s *Signature) VerifySignature() error {
 	if err != nil {
 		return err
 	}
-	pk, err := loadKey(s.Key)
+	pk, err := crypto.LoadKey(s.Key)
 	if err != nil {
 		return err
 	}
@@ -62,7 +62,7 @@ func hash(a, b string) string {
 	return string(h.Sum(nil))
 }
 
-func buildMerkle(ts []*database.Torrent) *MerkleNode {
+func buildMerkle(ts []*Torrent) *MerkleNode {
 	if len(ts) == 0 {
 		panic("This should never happen")
 	}

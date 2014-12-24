@@ -1,25 +1,22 @@
-package crypto
+package database
 
 import (
 	"fmt"
 	"testing"
 	"time"
 
-	"github.com/TheDistributedBay/TheDistributedBay/database"
+	"github.com/TheDistributedBay/TheDistributedBay/crypto"
 )
 
 func TestMerkle(t *testing.T) {
-	k, err := NewKey()
+	k, err := crypto.NewKey()
 	if err != nil {
 		t.Fatal(err)
 	}
-	ts := make([]*database.Torrent, 0)
+	ts := make([]*Torrent, 0)
 
 	for i := 0; i < 5; i++ {
-		r, err := CreateTorrent(k, fmt.Sprint(i), "n", "d", "cat", time.Now(), []string{"tag"})
-		if err != nil {
-			t.Fatal(err)
-		}
+		r := CreateTorrent(fmt.Sprint(i), "n", "d", "cat", time.Now(), []string{"tag"})
 		ts = append(ts, r)
 	}
 

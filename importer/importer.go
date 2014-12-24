@@ -14,7 +14,7 @@ import (
 	"github.com/TheDistributedBay/TheDistributedBay/database"
 )
 
-func ProduceTorrents(file string, c chan *database.Torrent) {
+func ProduceTorrents(file string, c chan *database.Torrent, d chan *database.Torrent) {
 	log.Println("Reading database dump from:", file)
 	f, err := os.Open(file)
 	if err != nil {
@@ -31,13 +31,6 @@ func ProduceTorrents(file string, c chan *database.Torrent) {
 	cr.LazyQuotes = true
 	cr.Comma = '|'
 
-	// Signing import with random initial key
-	ecdsa, err := crypto.NewKey()
-	if err != nil {
-		log.Print(err)
-		return
-	}
-
 	for rec, err := cr.Read(); err != io.EOF; rec, err = cr.Read() {
 		if err != nil {
 			log.Print(err)
@@ -52,17 +45,19 @@ func ProduceTorrents(file string, c chan *database.Torrent) {
 		//seeder := rec[5]
 		//leecher := rec[6]
 
-		t, err := crypto.CreateTorrent(ecdsa, magnet, name, "from db dump", category, time.Now(), nil)
+		t := database.CreateTorrent(magnet, name, "from db dump", category, time.Now(), nil)
 		if err != nil {
 			log.Print(err)
 			continue
 		}
 		c <- t
+		d <- t
 	}
 	close(c)
+	close(d)
 }
 
-func WriteDb(db database.Database, c chan *database.Torrent, totalRows int64) {
+func WriteDbTorrent(db database.Database, c chan *database.Torrent, totalRows int64) {
 	start := time.Now()
 	count := int64(0)
 	for t := range c {
@@ -73,7 +68,35 @@ func WriteDb(db database.Database, c chan *database.Torrent, totalRows int64) {
 			log.Println("Loaded: ", count, "of", totalRows, "(ETA:", eta.String()+")")
 		}
 	}
-	log.Println("TOTAL", count)
+}
+
+func WriteDbSignature(db database.Database, d chan *database.Torrent, totalRows int64) {
+	start := time.Now()
+	count := int64(0)
+	open := true
+	b := make([]*database.Torrent, 0)
+	k, err := crypto.NewKey()
+	if err != nil {
+		panic(err)
+	}
+	for open {
+		b = b[:0]
+		for i := 0; i < 100 && open; i++ {
+			var t *database.Torrent
+			t, open = <-d
+			b = append(b, t)
+		}
+		count += int64(len(b))
+		s, err := database.SignTorrents(k, b)
+		if err != nil {
+			panic(err)
+		}
+		db.AddSignature(s)
+		if count%1000 == 0 {
+			eta := time.Now().Sub(start) * time.Duration(totalRows) / time.Duration(count)
+			log.Println("Signed: ", count, "of", totalRows, "(ETA:", eta.String()+")")
+		}
+	}
 }
 
 func CalculateSize(file string) int64 {
@@ -102,9 +125,11 @@ func CalculateSize(file string) int64 {
 
 func Import(file string, db database.Database) {
 	c := make(chan *database.Torrent, 2)
+	d := make(chan *database.Torrent, 200)
 	log.Print("Calculating size")
 	totalRows := CalculateSize(file)
 	log.Print("Done")
-	go ProduceTorrents(file, c)
-	go WriteDb(db, c, totalRows)
+	go ProduceTorrents(file, c, d)
+	go WriteDbTorrent(db, c, totalRows)
+	go WriteDbSignature(db, d, totalRows)
 }

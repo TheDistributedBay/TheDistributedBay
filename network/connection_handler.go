@@ -35,6 +35,8 @@ func (h *ConnectionHandler) NewTorrent(t *database.Torrent) {
 	}
 }
 
+func (h *ConnectionHandler) NewSignature(s *database.Signature) {}
+
 // Shovels torrents into the db
 func (h *ConnectionHandler) shovel() {
 	for {
