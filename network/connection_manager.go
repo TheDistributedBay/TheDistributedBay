@@ -20,6 +20,7 @@ type Connection interface {
 	Write(b []byte) (int, error)
 	Close() error
 	Protocol() string
+	Handshake() error
 }
 
 func NewConnectionManager(db database.Database) *ConnectionManager {
@@ -43,6 +44,12 @@ func (m *ConnectionManager) Listen(l net.Listener) {
 }
 
 func (m *ConnectionManager) Handle(c Connection) {
+	err := c.HandShake()
+	if err != nil {
+		log.Warning(err)
+		c.Close()
+		return
+	}
 	if c.Protocol() != tls.Proto {
 		log.Printf("Unrecognized proto on %v : %v", c, c.Protocol())
 		c.Close()
