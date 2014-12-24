@@ -44,9 +44,9 @@ func (m *ConnectionManager) Listen(l net.Listener) {
 }
 
 func (m *ConnectionManager) Handle(c Connection) {
-	err := c.HandShake()
+	err := c.Handshake()
 	if err != nil {
-		log.Warning(err)
+		log.Print(err)
 		c.Close()
 		return
 	}

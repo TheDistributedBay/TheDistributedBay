@@ -31,6 +31,10 @@ func (s *sewer) Write(b []byte) (n int, err error) {
 	return s.w.Write(b)
 }
 
+func (s *sewer) Handshake() error {
+	return nil
+}
+
 func (s *sewer) Protocol() string {
 	return tls.Proto
 }
