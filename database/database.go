@@ -29,15 +29,25 @@ func NewTorrentDB(dir string) (*TorrentDB, error) {
 	return &TorrentDB{db, nil, &sync.RWMutex{}}, nil
 }
 
-func (db *TorrentDB) NumTorrents() int {
-	db.lock.RLock()
-	defer db.lock.RUnlock()
+func (db *TorrentDB) GetTorrents(c chan string) {
 	ro := levigo.NewReadOptions()
 	ro.SetFillCache(false)
 	defer ro.Close()
 	it := db.db.NewIterator(ro)
-	count := 0
 	for it.SeekToFirst(); it.Valid(); it.Next() {
+		k := it.Key()
+		if k[0] == 't' {
+			c <- string(k[1:])
+		}
+	}
+	close(c)
+}
+
+func (db *TorrentDB) NumTorrents() int {
+	c := make(chan string)
+	go db.GetTorrents(c)
+	count := 0
+	for range c {
 		count += 1
 	}
 	return count

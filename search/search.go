@@ -13,7 +13,7 @@ func NewSearcher(db core.Database, dir string) (*Searcher, error) {
 	}
 	b.BatchSize = 100
 	s := &Searcher{b, db}
-	go db.AddClient(s)
+	go s.shovel()
 	return s, nil
 }
 
@@ -22,11 +22,18 @@ type Searcher struct {
 	db core.Database
 }
 
-func (s *Searcher) NewTorrent(t *core.Torrent) {
-	s.b.NewBatchedTorrent(t)
+func (s *Searcher) shovel() {
+	c := make(chan string)
+	go s.db.GetTorrents(c)
+	for h := range c {
+		t, err := s.db.Get(h)
+		if err != nil {
+			log.Print(err)
+			continue
+		}
+		s.b.NewBatchedTorrent(t)
+	}
 }
-
-func (s *Searcher) NewSignature(*core.Signature) {}
 
 func (s *Searcher) Search(term string, from int, size int) ([]*core.Torrent, uint64, error) {
 	result, err := s.b.Search(term, from, size)

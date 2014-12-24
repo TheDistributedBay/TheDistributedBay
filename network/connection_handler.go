@@ -16,10 +16,12 @@ type ConnectionHandler struct {
 }
 
 func NewConnectionHandler(t *Transcoder, db core.Database) *ConnectionHandler {
-	h := &ConnectionHandler{t, db, nil, &sync.RWMutex{}}
+	h := &ConnectionHandler{t, db, make(map[string]struct{}), &sync.RWMutex{}}
 
 	m := make(map[string]struct{})
-	for _, h := range h.db.List() {
+	c := make(chan string)
+	go h.db.GetTorrents(c)
+	for h := range c {
 		m[h] = struct{}{}
 	}
 	go h.t.Write(Message{"TorrentList", m, nil})

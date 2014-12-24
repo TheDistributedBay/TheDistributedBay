@@ -11,4 +11,5 @@ type Database interface {
 	AddSignature(s *Signature)
 	List() []string
 	AddClient(w TorrentWriter)
+	GetTorrents(c chan string)
 }
