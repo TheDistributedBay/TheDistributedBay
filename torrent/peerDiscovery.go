@@ -2,6 +2,8 @@ package torrent
 
 import (
 	"log"
+	"net"
+	"strconv"
 	"time"
 
 	"github.com/nictuku/dht"
@@ -10,13 +12,25 @@ import (
 	"github.com/TheDistributedBay/TheDistributedBay/tls"
 )
 
-func DiscoverPeers(cm *network.ConnectionManager) {
+func DiscoverPeers(cm *network.ConnectionManager, address string) {
 	// Hex encoded string: "The Distributed Bay!"
 	ih, err := dht.DecodeInfoHash("5468652044697374726962757465642042617921")
 	if err != nil {
 		log.Fatal("DHT DecodeInfoHash error: %v\n", err)
 	}
-	node, err := dht.New(nil)
+
+	_, portStr, err := net.SplitHostPort(address)
+	if err != nil {
+		log.Fatal("Bind address error!", err)
+	}
+	port, err := strconv.Atoi(portStr)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	config := dht.NewConfig()
+	config.Port = port
+	node, err := dht.New(config)
 	if err != nil {
 		log.Fatal("Error creating DHT node!")
 	}
