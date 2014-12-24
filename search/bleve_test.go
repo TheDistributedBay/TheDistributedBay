@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/TheDistributedBay/TheDistributedBay/database"
+	"github.com/TheDistributedBay/TheDistributedBay/core"
 )
 
 func testTorrent(i string, c time.Time) *core.Torrent {

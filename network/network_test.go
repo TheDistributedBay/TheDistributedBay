@@ -5,12 +5,13 @@ import (
 	"testing"
 	"time"
 
+	"github.com/TheDistributedBay/TheDistributedBay/core"
 	"github.com/TheDistributedBay/TheDistributedBay/database"
 	"github.com/TheDistributedBay/TheDistributedBay/tls"
 )
 
 func createDefaultTorrent(d string) *core.Torrent {
-	return database.CreateTorrent("magnetlink", "name", d, "category", time.Now(), nil)
+	return core.CreateTorrent("magnetlink", "name", d, "category", time.Now(), nil)
 }
 
 type sewer struct {

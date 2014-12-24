@@ -29,24 +29,30 @@ func New(c core.TorrentWriter) *BufferedClient {
 }
 
 func (b *BufferedClient) torrents() {
+	b.lt.Lock()
 	for {
-		b.lt.Lock()
+		for len(b.t) > 0 {
+			t := b.t[0]
+			b.t = b.t[1:]
+			b.lt.Unlock()
+			b.c.NewTorrent(t)
+			b.lt.Lock()
+		}
 		b.ct.Wait()
-		t := b.t[0]
-		b.t = b.t[1:]
-		b.lt.Unlock()
-		b.c.NewTorrent(t)
 	}
 }
 
 func (b *BufferedClient) sigs() {
+	b.ls.Lock()
 	for {
-		b.ls.Lock()
+		for len(b.s) > 0 {
+			s := b.s[0]
+			b.s = b.s[1:]
+			b.ls.Unlock()
+			b.c.NewSignature(s)
+			b.ls.Lock()
+		}
 		b.cs.Wait()
-		s := b.s[0]
-		b.s = b.s[1:]
-		b.ls.Unlock()
-		b.c.NewSignature(s)
 	}
 }
 
