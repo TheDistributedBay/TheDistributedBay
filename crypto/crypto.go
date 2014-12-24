@@ -11,7 +11,6 @@ import (
 	"crypto/sha512"
 	"encoding/binary"
 	"encoding/hex"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -27,16 +26,7 @@ func NewKey() (*ecdsa.PrivateKey, error) {
 
 func CreateTorrent(k *ecdsa.PrivateKey, magnetlink, name, description string, categoryid string, createdAt time.Time, tags []string) (*database.Torrent, error) {
 	t := &database.Torrent{"", "", "", magnetlink, name, description, 1, createdAt, tags}
-	var err error
-	t.PublicKey, err = stringifyKey(&k.PublicKey)
-	if err != nil {
-		return nil, err
-	}
 	t.Hash = hashTorrent(t)
-	t.Signature, err = sign(t.Hash, k)
-	if err != nil {
-		return nil, err
-	}
 	return t, nil
 }
 
@@ -54,74 +44,28 @@ func hashTorrent(t *database.Torrent) string {
 	return hex.EncodeToString(h.Sum(nil))
 }
 
-type encodedKey struct {
+type EncodedKey struct {
 	Curve string
 	X, Y  *big.Int
 }
 
-func stringifyKey(k *ecdsa.PublicKey) (string, error) {
+func encodeKey(k *ecdsa.PublicKey) *EncodedKey {
 	if k.Curve != elliptic.P224() {
 		panic("Incorrect curve in use")
 	}
 
-	e := encodedKey{"ecdsa:P224", k.X, k.Y}
-	b, err := json.Marshal(e)
-	if err != nil {
-		return "", err
-	}
-	return string(b), err
+	return &EncodedKey{"ecdsa:P224", k.X, k.Y}
 }
 
-func loadKey(p string) (*ecdsa.PublicKey, error) {
-	t := encodedKey{}
-	err := json.Unmarshal([]byte(p), &t)
-	if err != nil {
-		return nil, err
+func loadKey(e *EncodedKey) (*ecdsa.PublicKey, error) {
+	if e.Curve != "ecdsa:P224" {
+		return nil, errors.New("unrecognized key type :" + e.Curve)
 	}
-	if t.Curve != "ecdsa:P224" {
-		return nil, errors.New("unrecognized key type :" + t.Curve)
-	}
-
 	k := &ecdsa.PublicKey{}
 	k.Curve = elliptic.P224()
-	k.X = t.X
-	k.Y = t.Y
+	k.X = e.X
+	k.Y = e.Y
 	return k, nil
-}
-
-type encodedSignature struct {
-	R, S *big.Int
-}
-
-func sign(data string, k *ecdsa.PrivateKey) (string, error) {
-	sig := encodedSignature{}
-	var err error
-	sig.R, sig.S, err = ecdsa.Sign(rand.Reader, k, []byte(data))
-	if err != nil {
-		return "", err
-	}
-
-	b, err := json.Marshal(sig)
-	return string(b), err
-}
-
-func verify(data string, signature string, key string) error {
-	sig := encodedSignature{}
-	pk, err := loadKey(key)
-	if err != nil {
-		return err
-	}
-
-	err = json.Unmarshal([]byte(signature), &sig)
-	if err != nil {
-		return err
-	}
-
-	ok := ecdsa.Verify(pk, []byte(data), sig.R, sig.S)
-	if !ok {
-		return errors.New("invalid signature")
-	}
-	return nil
 }
 
 func VerifyTorrent(t *database.Torrent) error {
@@ -129,6 +73,5 @@ func VerifyTorrent(t *database.Torrent) error {
 	if h != t.Hash {
 		return errors.New(fmt.Sprintf("mutated hash %s vs %s", h, t.Hash))
 	}
-
-	return verify(h, t.Signature, t.PublicKey)
+	return nil
 }
