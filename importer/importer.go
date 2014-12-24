@@ -84,6 +84,10 @@ func WriteDbSignature(db core.Database, d chan *core.Torrent, totalRows int64) {
 		for i := 0; i < 100 && open; i++ {
 			var t *core.Torrent
 			t, open = <-d
+      if !open {
+        log.Println("Finished import! Imported", count, "rows.")
+        return
+      }
 			b = append(b, t)
 		}
 		count += int64(len(b))
