@@ -4,6 +4,7 @@ import (
 	"compress/gzip"
 	"encoding/csv"
 	"fmt"
+	"html"
 	"io"
 	"log"
 	"os"
@@ -37,7 +38,7 @@ func ProduceTorrents(file string, c chan *core.Torrent, d chan *core.Torrent) {
 			continue
 		}
 
-		name := rec[0]
+		name := html.UnescapeString(rec[0])
 		//created := rec[1]
 		magnet := fmt.Sprintf("magnet:?xt=urn:btih:%s", rec[2])
 
@@ -64,7 +65,7 @@ func WriteDbTorrent(db core.Database, c chan *core.Torrent, totalRows int64) {
 		count++
 		db.Add(t)
 		if count%10000 == 0 {
-			eta := time.Now().Sub(start) / time.Duration(count) * time.Duration(totalRows - count)
+			eta := time.Now().Sub(start) / time.Duration(count) * time.Duration(totalRows-count)
 			log.Println("Loaded: ", count, "of", totalRows, "(ETA:", eta.String()+")")
 		}
 	}
@@ -97,7 +98,7 @@ func WriteDbSignature(db core.Database, d chan *core.Torrent, totalRows int64) {
 		}
 		db.AddSignature(s)
 		if count%10000 == 0 {
-			eta := time.Now().Sub(start) / time.Duration(count) * time.Duration(totalRows - count)
+			eta := time.Now().Sub(start) / time.Duration(count) * time.Duration(totalRows-count)
 			log.Println("Signed: ", count, "of", totalRows, "(ETA:", eta.String()+")")
 		}
 	}

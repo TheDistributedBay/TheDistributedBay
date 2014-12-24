@@ -51,7 +51,7 @@ func Dial(addr string) (*wrap, error) {
 		return nil, err
 	}
 	d := net.Dialer{}
-	d.Timeout = time.Second
+	d.Timeout = 3 * time.Second
 	c, err := tls.DialWithDialer(&d, "tcp", addr, co)
 	return Wrap(c), err
 }
