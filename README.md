@@ -1,4 +1,4 @@
-# [![TheDistributedBay](https://raw.githubusercontent.com/TheDistributedBay/TheDistributedBay/master/frontend/angular/app/images/The_Distributed_Bay_logo_black.svg)](https://github.com/TheDistributedBay/TheDistributedBay)
+# [![TheDistributedBay](https://cdn.rawgit.com/TheDistributedBay/TheDistributedBay/master/frontend/angular/app/images/The_Distributed_Bay_logo_black.svg)](https://github.com/TheDistributedBay/TheDistributedBay)
 An implementation of The Distributed Bay.
 One monolithic binary that bootstraps into the network.
 
