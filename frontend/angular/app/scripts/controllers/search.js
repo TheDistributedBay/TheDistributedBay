@@ -45,9 +45,6 @@ angular.module('theDistributedBayApp')
         p: $location.search().p
       }).then(function(result) {
         console.log("Search results", result);
-        _.each(result.Torrents, function(torrent) {
-          torrent.Name = _.escape(torrent.Name);
-        });
         $scope.torrents = result.Torrents;
         $scope.pages = result.Pages;
         if ($scope.page >= $scope.pages) {

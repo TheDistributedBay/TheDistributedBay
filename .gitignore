@@ -1,2 +1,4 @@
 *.bleve/
 tmp/
+*.index/
+*.db
