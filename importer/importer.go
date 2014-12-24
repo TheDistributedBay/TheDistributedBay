@@ -64,7 +64,7 @@ func WriteDbTorrent(db database.Database, c chan *database.Torrent, totalRows in
 		count++
 		db.Add(t)
 		if count%1000 == 0 {
-			eta := time.Now().Sub(start) * time.Duration(totalRows) / time.Duration(count)
+			eta := time.Now().Sub(start) / time.Duration(count) * time.Duration(totalRows)
 			log.Println("Loaded: ", count, "of", totalRows, "(ETA:", eta.String()+")")
 		}
 	}

@@ -20,38 +20,85 @@ import (
 //  BEP 12 Multitracker Metadata Extension
 //  BEP 15 UDP Tracker Protocol
 
-type TrackerResponse struct {
+type Range struct {
+	Min, Max uint
+}
+
+func (r *Range) Update(val uint) {
+	r.Max += val
+	if r.Min < val {
+		r.Min = val
+	}
+}
+
+type InfoHashDetails struct {
 	InfoHash                     string
 	Seeders, Leechers, Completed uint
 }
 
-func ScrapeTrackers(scrapeList []string, infoHashes []string) ([]TrackerResponse, error) {
+type InfoHashRange struct {
+	InfoHash                     string
+	Seeders, Leechers, Completed Range
+}
+
+type TrackerResponse struct {
+	Details []InfoHashDetails
+	Error   error
+}
+
+func ScrapeTrackers(scrapeList []string, infoHashes []string) ([]InfoHashRange, error) {
+	resp := make(chan TrackerResponse, len(scrapeList))
 	for _, tracker := range scrapeList {
-		tr, err := queryTracker(infoHashes, tracker)
-		if err == nil {
-			return tr, nil
+		go queryTracker(infoHashes, tracker, resp)
+	}
+	responseCount := 0
+	errorCount := 0
+	bestDetails := make([]InfoHashRange, len(infoHashes))
+	for i, hash := range infoHashes {
+		bestDetails[i].InfoHash = hash
+	}
+	for trackerResp := range resp {
+		if trackerResp.Error != nil {
+			errorCount += 1
+		} else {
+			for i, detail := range trackerResp.Details {
+				bestDetail := bestDetails[i]
+				bestDetail.Seeders.Update(detail.Seeders)
+				bestDetail.Leechers.Update(detail.Leechers)
+				bestDetail.Completed.Update(detail.Completed)
+			}
+		}
+		responseCount += 1
+		if errorCount >= len(scrapeList) {
+			break
+		}
+		if responseCount >= len(scrapeList) {
+			return bestDetails, nil
 		}
 	}
 	return nil, errors.New("Did not successfully contact a tracker.")
 }
 
-func queryTracker(infoHashes []string, trackerUrl string) (tr []TrackerResponse, err error) {
+func queryTracker(infoHashes []string, trackerUrl string, resp chan TrackerResponse) {
 	u, err := url.Parse(trackerUrl)
 	if err != nil {
 		log.Println("Error: Invalid announce URL(", trackerUrl, "):", err)
+		resp <- TrackerResponse{nil, err}
 		return
 	}
 	switch u.Scheme {
 	case "http":
 		fallthrough
 	case "https":
-		return queryHTTPTracker(infoHashes, u)
+		results, err := queryHTTPTracker(infoHashes, u)
+		resp <- TrackerResponse{results, err}
 	case "udp":
-		return queryUDPTracker(infoHashes, u)
+		results, err := queryUDPTracker(infoHashes, u)
+		resp <- TrackerResponse{results, err}
 	default:
 		errorMessage := fmt.Sprintf("Unknown scheme %v in %v", u.Scheme, trackerUrl)
 		log.Println(errorMessage)
-		return nil, errors.New(errorMessage)
+		resp <- TrackerResponse{nil, errors.New(errorMessage)}
 	}
 }
 
@@ -64,7 +111,7 @@ func proxyHttpClient() *http.Client {
 	return &http.Client{Transport: tr}
 }
 
-func getTrackerInfo(url string) (tr []TrackerResponse, err error) {
+func getTrackerInfo(url string) (tr []InfoHashDetails, err error) {
 	r, err := proxyHttpGet(url)
 	if err != nil {
 		return
@@ -77,7 +124,7 @@ func getTrackerInfo(url string) (tr []TrackerResponse, err error) {
 		err = errors.New(reason)
 		return
 	}
-	//var tr2 TrackerResponse
+	//var tr2 InfoHashDetails
 	log.Println("HTTP REQ TODO", r.Body)
 	/*err = bencode.Unmarshal(r.Body, &tr2)
 	r.Body.Close()
@@ -89,7 +136,7 @@ func getTrackerInfo(url string) (tr []TrackerResponse, err error) {
 	return
 }
 
-func queryHTTPTracker(infoHashes []string, u *url.URL) (tr []TrackerResponse, err error) {
+func queryHTTPTracker(infoHashes []string, u *url.URL) (tr []InfoHashDetails, err error) {
 	uq := u.Query()
 	for _, infoHash := range infoHashes {
 		uq.Add("info_hash", infoHash)
@@ -142,7 +189,7 @@ func findLocalIPV6AddressFor(hostAddr string) (local string, err error) {
 	return
 }
 
-func queryUDPTracker(infoHashes []string, u *url.URL) (tr []TrackerResponse, err error) {
+func queryUDPTracker(infoHashes []string, u *url.URL) (tr []InfoHashDetails, err error) {
 	serverAddr, err := net.ResolveUDPAddr("udp", u.Host)
 	if err != nil {
 		return
@@ -153,22 +200,13 @@ func queryUDPTracker(infoHashes []string, u *url.URL) (tr []TrackerResponse, err
 	}
 	defer func() { con.Close() }()
 
-	var connectionID uint64
-	for retry := uint(0); retry < uint(3); retry++ {
-		err = con.SetDeadline(time.Now().Add(2 * time.Second))
-		if err != nil {
-			return
-		}
-		connectionID, err = connectToUDPTracker(con)
-		if err == nil {
-			break
-		}
-		if nerr, ok := err.(net.Error); ok && nerr.Timeout() {
-			continue
-		}
-		if err != nil {
-			return
-		}
+	err = con.SetDeadline(time.Now().Add(2 * time.Second))
+	if err != nil {
+		return
+	}
+	connectionID, err := connectToUDPTracker(con)
+	if err != nil {
+		return
 	}
 	return getScrapeFromUDPTracker(con, connectionID, infoHashes)
 }
@@ -236,7 +274,7 @@ func connectToUDPTracker(con *net.UDPConn) (connectionID uint64, err error) {
 	return
 }
 
-func getScrapeFromUDPTracker(con *net.UDPConn, connectionID uint64, infoHashes []string) (tr []TrackerResponse, err error) {
+func getScrapeFromUDPTracker(con *net.UDPConn, connectionID uint64, infoHashes []string) (tr []InfoHashDetails, err error) {
 	transactionID := rand.Uint32()
 
 	announcementRequest := new(bytes.Buffer)
@@ -303,7 +341,7 @@ func getScrapeFromUDPTracker(con *net.UDPConn, connectionID uint64, infoHashes [
 		err = fmt.Errorf("Unexpected response transactionID %x", responseTransactionID)
 		return
 	}
-	tr = make([]TrackerResponse, torrentRequestCount)
+	tr = make([]InfoHashDetails, torrentRequestCount)
 	for i, infoHash := range infoHashes {
 		var seeders uint32
 		err = binary.Read(response, binary.BigEndian, &seeders)
@@ -320,7 +358,7 @@ func getScrapeFromUDPTracker(con *net.UDPConn, connectionID uint64, infoHashes [
 		if err != nil {
 			return
 		}
-		tr[i] = TrackerResponse{
+		tr[i] = InfoHashDetails{
 			InfoHash:  infoHash,
 			Seeders:   uint(seeders),
 			Completed: uint(completed),

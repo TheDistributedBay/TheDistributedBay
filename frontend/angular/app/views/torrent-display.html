@@ -30,10 +30,10 @@
     </tbody>
   </table>
   <div class="pages">
-    <a href="{{jumpLinks.start}}"><i class="fa fa-angle-double-left"></i></a>
-    <a href="{{jumpLinks.prev}}"><i class="fa fa-angle-left"></i></a>
-    <a ng-repeat="page in pageLinks" href="{{page.link}}" ng-class="{active: page.active}" ng-click="updateSearch(page)">{{page.page}}</a>
-    <a href="{{jumpLinks.next}}"><i class="fa fa-angle-right"></i></a>
-    <a href="{{jumpLinks.end}}"><i class="fa fa-angle-double-right"></i></a>
+    <a href="{{jumpLinks.start}}" title="Beginning"><i class="fa fa-angle-double-left"></i></a>
+    <a href="{{jumpLinks.prev}}" title="Previous"><i class="fa fa-angle-left"></i></a>
+    <a ng-repeat="page in pageLinks" href="{{page.link}}" title="Page {{page.page}}" ng-class="{active: page.active}" ng-click="updateSearch(page)">{{page.page}}</a>
+    <a href="{{jumpLinks.next}}" title="Next"><i class="fa fa-angle-right"></i></a>
+    <a href="{{jumpLinks.end}}" title="End"><i class="fa fa-angle-double-right"></i></a>
   </div>
 </div>
