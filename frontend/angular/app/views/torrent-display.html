@@ -22,7 +22,7 @@
             <a href="/search?category={{torrent.Category}}" title="Browse {{torrent.Category}} torrents">{{torrent.Category}}</a>
           </div>
         </td>
-        <td class="date-row">{{moment(torrent.CreatedAt)}}</td>
+        <td class="date-row">{{torrent.TimeAgo}}</td>
         <td class="size-row">{{torrent.Size}}</td>
         <td class="seeders-row sy">{{torrent.Seeders}}</td>
         <td class="leechers-row ly">{{torrent.Leechers}}</td>
