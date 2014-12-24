@@ -1,7 +1,7 @@
 package core
 
 import (
-	"crypto/sha512"
+	"crypto/sha256"
 	"encoding/binary"
 	"encoding/hex"
 	"errors"
@@ -33,7 +33,7 @@ func (t *Torrent) CalculateHash() {
 }
 
 func hashTorrent(t *Torrent) string {
-	h := sha512.New()
+	h := sha256.New()
 	io.WriteString(h, t.MagnetLink)
 	io.WriteString(h, t.Name)
 	io.WriteString(h, t.Description)
