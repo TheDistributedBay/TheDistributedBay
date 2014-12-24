@@ -23,15 +23,17 @@ type Searcher struct {
 }
 
 func (s *Searcher) shovel() {
-	c := make(chan string)
-	go s.db.GetTorrents(c)
-	for h := range c {
-		t, err := s.db.Get(h)
-		if err != nil {
-			log.Print(err)
-			continue
+	for {
+		c := make(chan string)
+		go s.db.GetTorrents(c)
+		for h := range c {
+			t, err := s.db.Get(h)
+			if err != nil {
+				log.Print(err)
+				continue
+			}
+			s.b.NewBatchedTorrent(t)
 		}
-		s.b.NewBatchedTorrent(t)
 	}
 }
 
