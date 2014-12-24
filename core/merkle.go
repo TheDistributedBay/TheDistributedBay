@@ -3,7 +3,7 @@ package core
 import (
 	"crypto/ecdsa"
 	"crypto/rand"
-	"crypto/sha512"
+	"crypto/sha256"
 	"errors"
 	"io"
 	"math/big"
@@ -21,6 +21,14 @@ type MerkleNode struct {
 	hash string
 	l    *MerkleNode
 	r    *MerkleNode
+}
+
+func (s Signature) Hash() string {
+	m := sha256.New()
+	m.Write(s.R.Bytes())
+	m.Write(s.S.Bytes())
+	return string(m.Sum(nil))
+
 }
 
 func SignTorrents(k *ecdsa.PrivateKey, ts []*Torrent) (*Signature, error) {
@@ -56,7 +64,7 @@ func (s *Signature) ListTorrents() []string {
 }
 
 func hash(a, b string) string {
-	h := sha512.New()
+	h := sha256.New()
 	io.WriteString(h, a)
 	io.WriteString(h, b)
 	return string(h.Sum(nil))

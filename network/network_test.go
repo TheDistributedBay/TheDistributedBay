@@ -2,6 +2,7 @@ package network
 
 import (
 	"io"
+	"os"
 	"testing"
 	"time"
 
@@ -59,11 +60,19 @@ func testSewer() (*sewer, *sewer) {
 func TestSingleHop(t *testing.T) {
 	t1 := createDefaultTorrent("test1")
 
-	db1 := database.NewTorrentDB()
+	db1, err := database.NewTorrentDB("db1")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.RemoveAll("db1")
 	db1.Add(t1)
 	cm1 := NewConnectionManager(db1)
 
-	db2 := database.NewTorrentDB()
+	db2, err := database.NewTorrentDB("db2")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.RemoveAll("db2")
 	cm2 := NewConnectionManager(db2)
 
 	l, r := testSewer()

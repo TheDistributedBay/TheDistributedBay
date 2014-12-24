@@ -6,8 +6,8 @@ import (
 	"github.com/TheDistributedBay/TheDistributedBay/core"
 )
 
-func NewSearcher(db core.Database) (*Searcher, error) {
-	b, err := NewBleve("search.bleve")
+func NewSearcher(db core.Database, dir string) (*Searcher, error) {
+	b, err := NewBleve(dir)
 	if err != nil {
 		return nil, err
 	}

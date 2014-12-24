@@ -12,6 +12,7 @@ import (
 	"github.com/TheDistributedBay/TheDistributedBay/frontend"
 	"github.com/TheDistributedBay/TheDistributedBay/importer"
 	"github.com/TheDistributedBay/TheDistributedBay/network"
+	"github.com/TheDistributedBay/TheDistributedBay/search"
 	"github.com/TheDistributedBay/TheDistributedBay/stats"
 	"github.com/TheDistributedBay/TheDistributedBay/tls"
 	"github.com/TheDistributedBay/TheDistributedBay/torrent"
@@ -28,7 +29,10 @@ func main() {
 	devAssets := flag.Bool("devassets", false, "Tells the front end to serve development assests instead of the precompiled production ones.")
 	flag.Parse()
 
-	db := database.NewTorrentDB()
+	db, err := database.NewTorrentDB("torrent.db")
+	if err != nil {
+		log.Fatal("Error opening torrent database", err)
+	}
 	cm := network.NewConnectionManager(db)
 
 	if *connect != "" {
@@ -52,7 +56,12 @@ func main() {
 	go stats.ReportStats(db, cm)
 	go torrent.DiscoverPeers(cm, *listen)
 
+	s, err := search.NewSearcher(db, "torrent.index")
+	if err != nil {
+		log.Fatal("Error opening index", err)
+	}
+
 	log.Println("Running...")
-	frontend.Serve(httpAddress, db, *devAssets)
+	frontend.Serve(httpAddress, db, s, *devAssets)
 	cm.Close()
 }
