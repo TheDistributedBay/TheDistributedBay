@@ -11,11 +11,11 @@ import (
 
 	"github.com/gorilla/mux"
 
-	"github.com/TheDistributedBay/TheDistributedBay/database"
+	"github.com/TheDistributedBay/TheDistributedBay/core"
 	"github.com/TheDistributedBay/TheDistributedBay/search"
 )
 
-func Serve(httpAddress *string, db database.Database, devAssets bool) {
+func Serve(httpAddress *string, db core.Database, devAssets bool) {
 
 	// Add SVG to mime directory
 	mime.AddExtensionType(".svg", "image/svg+xml")
@@ -47,7 +47,7 @@ func Serve(httpAddress *string, db database.Database, devAssets bool) {
 	}
 }
 
-func ApiRouter(db database.Database) (*mux.Router, error) {
+func ApiRouter(db core.Database) (*mux.Router, error) {
 	s, err := search.NewSearcher(db)
 	if err != nil {
 		return nil, err

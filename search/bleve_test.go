@@ -5,15 +5,15 @@ import (
 	"testing"
 	"time"
 
-	"github.com/TheDistributedBay/TheDistributedBay/database"
+	"github.com/TheDistributedBay/TheDistributedBay/core"
 )
 
-func testTorrent(i string, c time.Time) *database.Torrent {
+func testTorrent(i string, c time.Time) *core.Torrent {
 	return simpleTorrent(i, i, i, c)
 }
 
-func simpleTorrent(hash, name, description string, c time.Time) *database.Torrent {
-	return &database.Torrent{hash, "magnetlink", name, description, 1, c, []string{"tags"}}
+func simpleTorrent(hash, name, description string, c time.Time) *core.Torrent {
+	return &core.Torrent{hash, "magnetlink", name, description, 1, c, []string{"tags"}}
 }
 
 func TestBleve(t *testing.T) {

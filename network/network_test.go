@@ -5,12 +5,13 @@ import (
 	"testing"
 	"time"
 
+	"github.com/TheDistributedBay/TheDistributedBay/core"
 	"github.com/TheDistributedBay/TheDistributedBay/database"
 	"github.com/TheDistributedBay/TheDistributedBay/tls"
 )
 
-func createDefaultTorrent(d string) *database.Torrent {
-	return database.CreateTorrent("magnetlink", "name", d, "category", time.Now(), nil)
+func createDefaultTorrent(d string) *core.Torrent {
+	return core.CreateTorrent("magnetlink", "name", d, "category", time.Now(), nil)
 }
 
 type sewer struct {
@@ -39,13 +40,13 @@ func (s *sewer) Protocol() string {
 	return tls.Proto
 }
 
-type dummyListener chan *database.Torrent
+type dummyListener chan *core.Torrent
 
-func (d *dummyListener) NewTorrent(t *database.Torrent) {
+func (d *dummyListener) NewTorrent(t *core.Torrent) {
 	*d <- t
 }
 
-func (d *dummyListener) NewSignature(s *database.Signature) {}
+func (d *dummyListener) NewSignature(s *core.Signature) {}
 
 func testSewer() (*sewer, *sewer) {
 	pr1, pw1 := io.Pipe()
@@ -69,7 +70,7 @@ func TestSingleHop(t *testing.T) {
 	go cm1.Handle(l)
 	go cm2.Handle(r)
 
-	c := make(chan *database.Torrent)
+	c := make(chan *core.Torrent)
 	listen := dummyListener(c)
 	db2.AddClient(&listen)
 

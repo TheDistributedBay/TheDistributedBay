@@ -5,12 +5,12 @@ import (
 	"log"
 	"net"
 
-	"github.com/TheDistributedBay/TheDistributedBay/database"
+	"github.com/TheDistributedBay/TheDistributedBay/core"
 	"github.com/TheDistributedBay/TheDistributedBay/tls"
 )
 
 type ConnectionManager struct {
-	db  database.Database
+	db  core.Database
 	chs []io.Closer
 	l   net.Listener
 }
@@ -23,7 +23,7 @@ type Connection interface {
 	Handshake() error
 }
 
-func NewConnectionManager(db database.Database) *ConnectionManager {
+func NewConnectionManager(db core.Database) *ConnectionManager {
 	return &ConnectionManager{db, nil, nil}
 }
 

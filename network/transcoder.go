@@ -4,13 +4,13 @@ import (
 	"encoding/json"
 	"io"
 
-	"github.com/TheDistributedBay/TheDistributedBay/database"
+	"github.com/TheDistributedBay/TheDistributedBay/core"
 )
 
 type Message struct {
 	Code     string
 	Torrents map[string]struct{}
-	Data     []*database.Torrent
+	Data     []*core.Torrent
 }
 
 type Transcoder struct {
