@@ -2,8 +2,8 @@ package core
 
 import (
 	"crypto/sha256"
+	"encoding/base64"
 	"encoding/binary"
-	"encoding/hex"
 	"errors"
 	"fmt"
 	"io"
@@ -42,7 +42,7 @@ func hashTorrent(t *Torrent) string {
 	for _, tag := range t.Tags {
 		io.WriteString(h, tag)
 	}
-	return hex.EncodeToString(h.Sum(nil))
+	return base64.URLEncoding.EncodeToString(h.Sum(nil))
 }
 
 func (t *Torrent) VerifyTorrent() error {
