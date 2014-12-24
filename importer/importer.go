@@ -64,7 +64,7 @@ func WriteDbTorrent(db core.Database, c chan *core.Torrent, totalRows int64) {
 		count++
 		db.Add(t)
 		if count%10000 == 0 {
-			eta := time.Now().Sub(start) / time.Duration(count) * time.Duration(totalRows)
+			eta := time.Now().Sub(start) / time.Duration(count) * time.Duration(totalRows - count)
 			log.Println("Loaded: ", count, "of", totalRows, "(ETA:", eta.String()+")")
 		}
 	}
@@ -97,7 +97,7 @@ func WriteDbSignature(db core.Database, d chan *core.Torrent, totalRows int64) {
 		}
 		db.AddSignature(s)
 		if count%10000 == 0 {
-			eta := time.Now().Sub(start) / time.Duration(count) * time.Duration(totalRows)
+			eta := time.Now().Sub(start) / time.Duration(count) * time.Duration(totalRows - count)
 			log.Println("Signed: ", count, "of", totalRows, "(ETA:", eta.String()+")")
 		}
 	}
