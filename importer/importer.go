@@ -4,6 +4,7 @@ import (
 	"compress/gzip"
 	"encoding/csv"
 	"fmt"
+	"html"
 	"io"
 	"log"
 	"os"
@@ -37,7 +38,7 @@ func ProduceTorrents(file string, c chan *core.Torrent, d chan *core.Torrent) {
 			continue
 		}
 
-		name := rec[0]
+		name := html.UnescapeString(rec[0])
 		//created := rec[1]
 		magnet := fmt.Sprintf("magnet:?xt=urn:btih:%s", rec[2])
 
@@ -63,8 +64,8 @@ func WriteDbTorrent(db core.Database, c chan *core.Torrent, totalRows int64) {
 	for t := range c {
 		count++
 		db.Add(t)
-		if count%1000 == 0 {
-			eta := time.Now().Sub(start) / time.Duration(count) * time.Duration(totalRows)
+		if count%10000 == 0 {
+			eta := time.Now().Sub(start) / time.Duration(count) * time.Duration(totalRows-count)
 			log.Println("Loaded: ", count, "of", totalRows, "(ETA:", eta.String()+")")
 		}
 	}
@@ -84,6 +85,10 @@ func WriteDbSignature(db core.Database, d chan *core.Torrent, totalRows int64) {
 		for i := 0; i < 100 && open; i++ {
 			var t *core.Torrent
 			t, open = <-d
+			if !open {
+				log.Println("Finished import! Imported", count, "rows.")
+				return
+			}
 			b = append(b, t)
 		}
 		count += int64(len(b))
@@ -92,8 +97,8 @@ func WriteDbSignature(db core.Database, d chan *core.Torrent, totalRows int64) {
 			panic(err)
 		}
 		db.AddSignature(s)
-		if count%1000 == 0 {
-			eta := time.Now().Sub(start) * time.Duration(totalRows) / time.Duration(count)
+		if count%10000 == 0 {
+			eta := time.Now().Sub(start) / time.Duration(count) * time.Duration(totalRows-count)
 			log.Println("Signed: ", count, "of", totalRows, "(ETA:", eta.String()+")")
 		}
 	}
