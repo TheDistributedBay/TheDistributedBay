@@ -21,6 +21,7 @@ func NewTorrentDB(dir string) (*TorrentDB, error) {
 	opts := levigo.NewOptions()
 	opts.SetCache(levigo.NewLRUCache(10 << 20))
 	opts.SetCreateIfMissing(true)
+	defer opts.Close()
 	db, err := levigo.Open(dir, opts)
 	if err != nil {
 		return nil, err
@@ -33,6 +34,7 @@ func (db *TorrentDB) NumTorrents() int {
 	defer db.lock.RUnlock()
 	ro := levigo.NewReadOptions()
 	ro.SetFillCache(false)
+	defer ro.Close()
 	it := db.db.NewIterator(ro)
 	count := 0
 	for it.SeekToFirst(); it.Valid(); it.Next() {
@@ -45,6 +47,7 @@ func (db *TorrentDB) Get(hash string) (*core.Torrent, error) {
 	db.lock.RLock()
 	defer db.lock.RUnlock()
 	ro := levigo.NewReadOptions()
+	defer ro.Close()
 	data, err := db.db.Get(ro, []byte("t"+hash))
 	if err != nil {
 		return nil, err
@@ -63,6 +66,7 @@ func (db *TorrentDB) Add(t *core.Torrent) error {
 	defer db.lock.Unlock()
 	data, err := json.Marshal(t)
 	wo := levigo.NewWriteOptions()
+	defer wo.Close()
 	err = db.db.Put(wo, []byte("t"+t.Hash), data)
 	if err != nil {
 		return err
@@ -79,6 +83,7 @@ func (db *TorrentDB) AddSignature(s *core.Signature) {
 	defer db.lock.Unlock()
 	data, err := json.Marshal(s)
 	wo := levigo.NewWriteOptions()
+	defer wo.Close()
 	err = db.db.Put(wo, []byte("s"+s.Hash()), data)
 	if err != nil {
 		log.Print(err)
@@ -94,6 +99,7 @@ func (db *TorrentDB) List() []string {
 	defer db.lock.RUnlock()
 	ro := levigo.NewReadOptions()
 	ro.SetFillCache(false)
+	defer ro.Close()
 	it := db.db.NewIterator(ro)
 	ts := make([]string, 0)
 	for it.SeekToFirst(); it.Valid(); it.Next() {
@@ -112,6 +118,7 @@ func (db *TorrentDB) AddClient(w core.TorrentWriter) {
 	db.writers = append(db.writers, ww)
 	ro := levigo.NewReadOptions()
 	ro.SetFillCache(false)
+	defer ro.Close()
 	it := db.db.NewIterator(ro)
 	for it.SeekToFirst(); it.Valid(); it.Next() {
 		k := it.Key()
