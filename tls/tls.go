@@ -50,9 +50,12 @@ func Dial(addr string) (*wrap, error) {
 	if err != nil {
 		return nil, err
 	}
-	c, err := tls.Dial("tcp", addr, co)
+	d := net.Dialer{}
+	d.Timeout = time.Second
+	c, err := tls.DialWithDialer(&d, "tcp", addr, co)
 	return Wrap(c), err
 }
+
 func Listen(addr string) (net.Listener, error) {
 	co, err := GenerateEmptyConfig()
 	if err != nil {
