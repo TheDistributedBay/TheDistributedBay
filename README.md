@@ -1,6 +1,7 @@
 # [![TheDistributedBay](https://cdn.rawgit.com/TheDistributedBay/TheDistributedBay/master/frontend/angular/app/images/The_Distributed_Bay_logo_black.svg)](https://github.com/TheDistributedBay/TheDistributedBay)
-An implementation of The Distributed Bay.
-One monolithic binary that bootstraps into the network.
+The Distributed Bay is a peer-to-peer rewrite of the Open Bay/Pirate Bay. It uses a completely distributed protocol to share entries between numerous nodes, this makes it nearly impossible to take down by seizure of servers. Each node contains a complete copy and any changes are propagate through the network.
+
+[Screen Shots](https://imgur.com/a/9ans9)
 
 ## Running with Docker
 On Ubuntu 14.10:
