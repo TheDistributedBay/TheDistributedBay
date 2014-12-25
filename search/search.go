@@ -2,6 +2,7 @@ package search
 
 import (
 	"log"
+	"time"
 
 	"github.com/TheDistributedBay/TheDistributedBay/core"
 )
@@ -24,8 +25,11 @@ type Searcher struct {
 
 func (s *Searcher) shovel() {
 	for {
+		time.Sleep(30 * time.Second)
+		log.Print("Starting index run")
 		c := make(chan string)
 		go s.db.GetTorrents(c)
+		count := 0
 		for h := range c {
 			if s.b.Exists(h) == nil {
 				continue
@@ -35,8 +39,10 @@ func (s *Searcher) shovel() {
 				log.Print(err)
 				continue
 			}
+			count += 1
 			s.b.NewBatchedTorrent(t)
 		}
+		log.Printf("%d new torrents indexed", count)
 	}
 }
 
