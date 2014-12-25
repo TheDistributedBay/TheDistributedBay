@@ -68,13 +68,11 @@ func (db *TorrentDB) Add(t *core.Torrent) error {
 	data, err := json.Marshal(t)
 	wo := levigo.NewWriteOptions()
 	defer wo.Close()
-	log.Printf("preparing to write")
 	err = db.db.Put(wo, []byte("t"+t.Hash), data)
 	if err != nil {
 		return err
 	}
 
-	log.Printf("Torrent written, relaying to %d clients", len(db.writers))
 	bad := make([]int, 0)
 	for i, w := range db.writers {
 		select {
@@ -85,7 +83,6 @@ func (db *TorrentDB) Add(t *core.Torrent) error {
 		}
 	}
 
-	log.Printf("%d bad clients", len(bad))
 	for c, i := range bad {
 		i = i - c
 		db.writers = append(db.writers[:i], db.writers[i+1:]...)
