@@ -48,6 +48,9 @@ func TestBleve(t *testing.T) {
 	if r.Total != 1 {
 		t.Fatal("Double indexed")
 	}
+	if err := bleve.Exists("t2"); err != nil {
+		t.Fatal("should have returned nil", err)
+	}
 }
 
 func BenchmarkTorrentCreation(b *testing.B) {

@@ -27,6 +27,9 @@ func (s *Searcher) shovel() {
 		c := make(chan string)
 		go s.db.GetTorrents(c)
 		for h := range c {
+			if s.b.Exists(h) == nil {
+				continue
+			}
 			t, err := s.db.Get(h)
 			if err != nil {
 				log.Print(err)
