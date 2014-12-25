@@ -12,17 +12,20 @@ func NewSearcher(db core.Database, dir string) (*Searcher, error) {
 		return nil, err
 	}
 	b.BatchSize = 100
-	s := &Searcher{b, db}
+	indexer := NewIndexer()
+	s := &Searcher{b, db, indexer}
 	go db.AddClient(s)
 	return s, nil
 }
 
 type Searcher struct {
-	b  *Bleve
-	db core.Database
+	b       *Bleve
+	db      core.Database
+	indexer *Indexer
 }
 
 func (s *Searcher) NewTorrent(t *core.Torrent) {
+	s.indexer.Index(t)
 	s.b.NewBatchedTorrent(t)
 }
 
