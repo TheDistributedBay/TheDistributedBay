@@ -8,18 +8,17 @@ import (
 )
 
 func NewSearcher(db core.Database, dir string) (*Searcher, error) {
-	b, err := NewBleve(dir)
+	b, err := NewElastic("localhost")
 	if err != nil {
 		return nil, err
 	}
-	b.BatchSize = 100
 	s := &Searcher{b, db}
 	go s.shovel()
 	return s, nil
 }
 
 type Searcher struct {
-	b  *Bleve
+	b  *Elastic
 	db core.Database
 }
 
@@ -47,31 +46,18 @@ func (s *Searcher) shovel() {
 }
 
 func (s *Searcher) Search(term string, from, size int, categories []uint8) ([]*core.Torrent, int, error) {
-	result, err := s.b.Search(term, 0, 100000000)
+	result, err := s.b.Search(term, from, size, categories)
 	if err != nil {
 		return nil, 0, err
 	}
 	torrents := make([]*core.Torrent, 0, size)
-	matchCount := 0
-	for _, e := range result.Hits {
-		t, err := s.db.Get(e.ID)
+	for _, e := range result.Hits.Hits {
+		t, err := s.db.Get(e.Id)
 		if err != nil {
-			log.Print("Stale torrent in index %s", e.ID)
+			log.Print("Stale torrent in index %s", e.Id)
 			continue
 		}
-		included := false
-		for _, category := range categories {
-			if category == t.CategoryID {
-				included = true
-				break
-			}
-		}
-		if len(categories) == 0 || categories[0] == 0 || included {
-			if matchCount >= from && matchCount < (from+size) {
-				torrents = append(torrents, t)
-			}
-			matchCount += 1
-		}
+		torrents = append(torrents, t)
 	}
-	return torrents, matchCount, nil
+	return torrents, result.Hits.Total, nil
 }

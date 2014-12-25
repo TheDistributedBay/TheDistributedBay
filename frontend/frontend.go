@@ -15,7 +15,7 @@ import (
 	"github.com/TheDistributedBay/TheDistributedBay/search"
 )
 
-func Serve(httpAddress *string, db core.Database, s *search.Searcher, i *search.Indexer, devAssets bool) {
+func Serve(httpAddress *string, db core.Database, s *search.Searcher, devAssets bool) {
 
 	// Add SVG to mime directory
 	mime.AddExtensionType(".svg", "image/svg+xml")
@@ -49,7 +49,7 @@ func Serve(httpAddress *string, db core.Database, s *search.Searcher, i *search.
 
 func ApiRouter(db core.Database, s *search.Searcher) (*mux.Router, error) {
 	r := mux.NewRouter()
-	r.Methods("GET").Path("/api/torrents").Handler(TorrentsHandler{s, db})
+	r.Methods("GET").Path("/api/search").Handler(SearchHandler{s, db})
 	r.Methods("POST").Path("/api/add_torrent").Handler(AddTorrentHandler{db})
 	r.Methods("GET").Path("/api/torrent").Handler(GetTorrentHandler{db})
 

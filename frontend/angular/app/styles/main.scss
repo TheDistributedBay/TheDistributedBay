@@ -5,7 +5,7 @@ $icon-font-path: "../bower_components/bootstrap-sass-official/assets/fonts/boots
 
 @mixin dotted-link {
   border-bottom: 1px dotted white;
-  &:hover {
+  &:hover, &:active, &:focus {
     border-bottom-style: solid;
     text-decoration: none;
   }
@@ -75,6 +75,14 @@ a:not[href="/"] {
   }
   & > a, .pages a {
     @include dotted-link;
+  }
+  .Age-column, .Size-column, .Seeders-column, .Leechers-column {
+    white-space: nowrap;
+    width: 1px;
+  }
+  th > a {
+    @include dotted-link;
+    color: white;
   }
   .table-torrents {
     text-align: left;

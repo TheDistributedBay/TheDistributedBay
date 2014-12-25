@@ -24,7 +24,7 @@ angular.module('theDistributedBayApp')
       }).join('&');
       var defer = $q.defer();
       searchCancel = $q.defer();
-      $http.get('/api/torrents?'+queryString, {timeout: searchCancel.promise, cache: true}).
+      $http.get('/api/search?'+queryString, {timeout: searchCancel.promise, cache: true}).
         success(function(data, status, headers, config) {
           defer.resolve(data);
         }).

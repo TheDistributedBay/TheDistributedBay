@@ -1,5 +1,7 @@
 'use strict';
 
+/*global angular, _*/
+
 /**
  * @ngdoc function
  * @name theDistributedBayApp.controller:SearchCtrl
@@ -9,11 +11,6 @@
  */
 angular.module('theDistributedBayApp')
   .controller('SearchCtrl', function ($scope, data, $location) {
-    $scope.pages = 0;
-    $scope.page = currentPage();
-    $scope.$watch('query', function(val) {
-      $scope.page = 0;
-    });
 
     function currentSearchWithPage(page) {
       var search = _.clone($location.search());
@@ -26,10 +23,25 @@ angular.module('theDistributedBayApp')
         return k + '=' + v;
       }).join('&');
     }
+    $scope.currentSearchWithSort = function(sort) {
+      var search = _.clone($location.search());
+      search.sort = sort;
+      delete search.p;
+
+      return $location.path() + '?' + _.map(search, function(v, k) {
+        return k + '=' + v;
+      }).join('&');
+    };
 
     function currentPage() {
       return parseInt($location.search().p || 0, 10);
     }
+
+    $scope.pages = 0;
+    $scope.page = currentPage();
+    $scope.$watch('query', function(val) {
+      $scope.page = 0;
+    });
 
     $scope.$on('$routeUpdate', function(){
       var search = $location.search();
@@ -39,7 +51,6 @@ angular.module('theDistributedBayApp')
     });
     $scope.$watchGroup(['query', 'page', 'category'], function() {
       $scope.loading = true;
-      console.log('page', $scope.page);
       var defer = data.search({
         q: $scope.query,
         p: $location.search().p,
@@ -58,14 +69,18 @@ angular.module('theDistributedBayApp')
           end: $scope.pages - 1
         }, currentSearchWithPage);
 
-        $scope.pageLinks = _.times($scope.pages, function(page) {
-          console.log(page, $scope.page, currentPage());
-          return {
+        var curPage = currentPage();
+        var start = Math.max(curPage - 5, 0);
+        var end = Math.min(curPage + 5, $scope.pages - 1);
+        $scope.pageLinks = [];
+        var page;
+        for (page = start; page <= end; page++) {
+          $scope.pageLinks.push({
             link: currentSearchWithPage(page),
             page: page + 1,
-            active: page === currentPage()
-          };
-        });
+            active: page === curPage
+          });
+        }
         $scope.loading = false;
       }, function(err) {
         console.log('SEARCH ERR', err);

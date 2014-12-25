@@ -56,35 +56,43 @@ angular.module('theDistributedBayApp')
           });
         }
         function updateSearch() {
+          var search = $location.search();
+          search.category = _.reduce($scope.categories, function(result, category) {
+            if (category.checked) {
+              return result.concat(category.name);
+            }
+            return result;
+          }, []).join(',');
+          if (search.category === '' || search.category === 'All') {
+            delete search.category;
+          }
+          $scope.category = search.category;
           if ($scope.query) {
             if ($location.path() !== '/search') {
               $location.path('/search');
             }
-            var search = $location.search();
             search.q = $scope.query;
-            search.category = _.reduce($scope.categories, function(result, category) {
-              if (category.checked) {
-                return result.concat(category.name);
-              } else {
-                return result;
-              }
-            }, []).join(',');
-            if (search.category === '' || search.category === 'All') {
-              delete search.category;
-            }
-            $scope.category = search.category;
 
             // Strip page if set to zero
             if (parseInt($scope.page, 10) !== 0) {
-                search.p = $scope.page;
+              search.p = $scope.page;
             } else {
-                delete search.p;
+              delete search.p;
             }
-            $location.search(search);
           } else {
-            $location.search('');
+            delete search.q;
+          }
+          $location.search(search);
+        }
+        function monitorChange(cur, old) {
+          console.log(cur, old);
+          if (cur !== old) {
+            delete $location.search().p;
+            $scope.page = 0;
           }
         }
+        $scope.$watch('query', monitorChange);
+        $scope.$watch('category', monitorChange);
         $scope.search = updateSearch;
         $scope.searchLucky = updateSearch;
         $scope.$watchGroup(['query', 'page'], function() {

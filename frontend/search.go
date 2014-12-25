@@ -12,7 +12,7 @@ import (
 	"github.com/TheDistributedBay/TheDistributedBay/search"
 )
 
-type TorrentsHandler struct {
+type SearchHandler struct {
 	s  *search.Searcher
 	db core.Database
 }
@@ -27,7 +27,7 @@ type TorrentBlob struct {
 	Pages    int
 }
 
-func (th TorrentsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (th SearchHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query().Get("q")
 	categories := strings.Split(r.URL.Query().Get("category"), ",")
 	categoryIds := make([]uint8, len(categories))
@@ -36,13 +36,17 @@ func (th TorrentsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	p := 0
 	fmt.Sscan(r.URL.Query().Get("p"), &p)
-	b := TorrentBlob{}
+
+	var results []*core.Torrent
+	var count int
+
 	results, count, err := th.s.Search(q, 35*p, 35, categoryIds)
 	if err != nil {
 		log.Print(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	b := TorrentBlob{}
 	b.Torrents = make([]searchResult, len(results))
 	for i, result := range results {
 		b.Torrents[i] = searchResult{

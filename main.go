@@ -61,9 +61,7 @@ func main() {
 		log.Fatal("Error opening index", err)
 	}
 
-	indexer := search.NewIndexer(db)
-
 	log.Println("Running...")
-	frontend.Serve(httpAddress, db, s, indexer, *devAssets)
+	frontend.Serve(httpAddress, db, s, *devAssets)
 	cm.Close()
 }
