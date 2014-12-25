@@ -15,7 +15,7 @@ import (
 	"github.com/TheDistributedBay/TheDistributedBay/search"
 )
 
-func Serve(httpAddress *string, db core.Database, s *search.Searcher, devAssets bool) {
+func Serve(httpAddress *string, db core.Database, s *search.Searcher, i *search.Indexer, devAssets bool) {
 
 	// Add SVG to mime directory
 	mime.AddExtensionType(".svg", "image/svg+xml")

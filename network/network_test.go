@@ -2,6 +2,7 @@ package network
 
 import (
 	"io"
+	"log"
 	"os"
 	"testing"
 	"time"
@@ -12,7 +13,7 @@ import (
 )
 
 func createDefaultTorrent(d string) *core.Torrent {
-	return core.CreateTorrent("magnetlink", "name", d, "category", time.Now(), nil)
+	return core.CreateTorrent([]byte("magnetlink"), "name", d, "category", time.Now(), nil)
 }
 
 type sewer struct {
@@ -41,14 +42,6 @@ func (s *sewer) Protocol() string {
 	return tls.Proto
 }
 
-type dummyListener chan *core.Torrent
-
-func (d *dummyListener) NewTorrent(t *core.Torrent) {
-	*d <- t
-}
-
-func (d *dummyListener) NewSignature(s *core.Signature) {}
-
 func testSewer() (*sewer, *sewer) {
 	pr1, pw1 := io.Pipe()
 	pr2, pw2 := io.Pipe()
@@ -58,6 +51,7 @@ func testSewer() (*sewer, *sewer) {
 }
 
 func TestSingleHop(t *testing.T) {
+	log.SetFlags(log.Lshortfile | log.LstdFlags)
 	t1 := createDefaultTorrent("test1")
 
 	db1, err := database.NewTorrentDB("db1")
@@ -79,12 +73,11 @@ func TestSingleHop(t *testing.T) {
 	go cm1.Handle(l)
 	go cm2.Handle(r)
 
-	c := make(chan *core.Torrent)
-	listen := dummyListener(c)
-	db2.AddClient(&listen)
+	c := make(chan *core.Torrent, 2)
+	db2.AddTorrentClient(c)
 
 	select {
-	case <-listen:
+	case <-c:
 	case <-time.After(time.Second):
 	}
 
@@ -105,7 +98,7 @@ func TestSingleHop(t *testing.T) {
 	db1.Add(t2)
 
 	select {
-	case <-listen:
+	case <-c:
 	case <-time.After(time.Second):
 	}
 

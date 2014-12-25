@@ -9,6 +9,6 @@ type Database interface {
 	Get(hash string) (*Torrent, error)
 	Add(t *Torrent) error
 	AddSignature(s *Signature)
-	List() []string
-	AddClient(w TorrentWriter)
+	AddTorrentClient(c chan *Torrent)
+	GetTorrents(c chan string)
 }

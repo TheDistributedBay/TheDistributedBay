@@ -13,7 +13,7 @@ func testTorrent(i string, c time.Time) *core.Torrent {
 }
 
 func simpleTorrent(hash, name, description string, c time.Time) *core.Torrent {
-	return &core.Torrent{hash, "magnetlink", name, description, 1, c, []string{"tags"}}
+	return &core.Torrent{hash, []byte("magnetlink"), name, description, 1, c, []string{"tags"}}
 }
 
 func TestBleve(t *testing.T) {
@@ -47,6 +47,9 @@ func TestBleve(t *testing.T) {
 	}
 	if r.Total != 1 {
 		t.Fatal("Double indexed")
+	}
+	if err := bleve.Exists("t2"); err != nil {
+		t.Fatal("should have returned nil", err)
 	}
 }
 

@@ -48,6 +48,11 @@ func (b *Bleve) Flush() {
 	b.b = bleve.NewBatch()
 }
 
+func (b *Bleve) Exists(h string) error {
+	_, err := b.i.Document(h)
+	return err
+}
+
 func (b *Bleve) Search(term string, from int, size int) (*bleve.SearchResult, error) {
 	q := bleve.NewQueryStringQuery(term)
 	r := bleve.NewSearchRequestOptions(q, size, from, false)

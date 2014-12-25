@@ -10,6 +10,12 @@ import (
 
 func ReportStats(db *database.TorrentDB, cm *network.ConnectionManager) {
 	for range time.Tick(time.Minute) {
-		log.Printf("TorrentDB(%d torrents) PeerManager(%d peers)", db.NumTorrents(), cm.NumPeers())
+		c := make(chan string)
+		go db.GetTorrents(c)
+		count := 0
+		for range c {
+			count += 1
+		}
+		log.Printf("TorrentDB(%d torrents) PeerManager(%d peers)", count, cm.NumPeers())
 	}
 }

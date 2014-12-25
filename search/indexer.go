@@ -2,6 +2,7 @@ package search
 
 import (
 	"container/heap"
+	"log"
 
 	"github.com/TheDistributedBay/TheDistributedBay/core"
 )
@@ -10,7 +11,7 @@ type Indexer struct {
 	indexes []*PriorityIndex
 }
 
-func NewIndexer() *Indexer {
+func NewIndexer(db core.Database) *Indexer {
 	indexes := make([]*PriorityIndex, 10)
 	for i, _ := range indexes {
 		index := make(PriorityIndex, 0)
@@ -20,6 +21,8 @@ func NewIndexer() *Indexer {
 	indexer := Indexer{
 		indexes,
 	}
+	go indexer.NewTorrent(db)
+
 	return &indexer
 }
 
@@ -37,6 +40,21 @@ func (i *Indexer) addItemToCategory(t *core.Torrent, category uint8) {
 	if len(*index) > 350 {
 		heap.Pop(index)
 	}
+}
+
+func (i *Indexer) NewTorrent(db core.Database) {
+	c := make(chan *core.Torrent, 2)
+	db.AddTorrentClient(c)
+
+	for t := range c {
+		i.Index(t)
+	}
+
+	log.Println("Indexer torrent channel closed. Reopenning.")
+
+	// If the database closes our connection, reopen it.
+	go i.NewTorrent(db)
+	return
 }
 
 // An TorrentIndex is something we manage in a priority queue.

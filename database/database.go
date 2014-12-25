@@ -7,13 +7,12 @@ import (
 
 	"github.com/jmhodges/levigo"
 
-	"github.com/TheDistributedBay/TheDistributedBay/client"
 	"github.com/TheDistributedBay/TheDistributedBay/core"
 )
 
 type TorrentDB struct {
 	db      *levigo.DB
-	writers []core.TorrentWriter
+	writers []chan *core.Torrent
 	lock    *sync.RWMutex
 }
 
@@ -29,18 +28,20 @@ func NewTorrentDB(dir string) (*TorrentDB, error) {
 	return &TorrentDB{db, nil, &sync.RWMutex{}}, nil
 }
 
-func (db *TorrentDB) NumTorrents() int {
-	db.lock.RLock()
-	defer db.lock.RUnlock()
+// Slow path designed for use by clients which can't keep up or to resync initially.
+// Note that this channel will be closed after all torrents in a database are read.
+func (db *TorrentDB) GetTorrents(c chan string) {
 	ro := levigo.NewReadOptions()
 	ro.SetFillCache(false)
 	defer ro.Close()
 	it := db.db.NewIterator(ro)
-	count := 0
 	for it.SeekToFirst(); it.Valid(); it.Next() {
-		count += 1
+		k := it.Key()
+		if k[0] == 't' {
+			c <- string(k[1:])
+		}
 	}
-	return count
+	close(c)
 }
 
 func (db *TorrentDB) Get(hash string) (*core.Torrent, error) {
@@ -67,13 +68,27 @@ func (db *TorrentDB) Add(t *core.Torrent) error {
 	data, err := json.Marshal(t)
 	wo := levigo.NewWriteOptions()
 	defer wo.Close()
+	log.Printf("preparing to write")
 	err = db.db.Put(wo, []byte("t"+t.Hash), data)
 	if err != nil {
 		return err
 	}
 
-	for _, w := range db.writers {
-		w.NewTorrent(t)
+	log.Printf("Torrent written, relaying to %d clients", len(db.writers))
+	bad := make([]int, 0)
+	for i, w := range db.writers {
+		select {
+		case w <- t:
+		default:
+			close(w)
+			bad = append(bad, i)
+		}
+	}
+
+	log.Printf("%d bad clients", len(bad))
+	for c, i := range bad {
+		i = i - c
+		db.writers = append(db.writers[:i], db.writers[i+1:]...)
 	}
 	return nil
 }
@@ -88,56 +103,11 @@ func (db *TorrentDB) AddSignature(s *core.Signature) {
 	if err != nil {
 		log.Print(err)
 	}
-
-	for _, w := range db.writers {
-		w.NewSignature(s)
-	}
 }
 
-func (db *TorrentDB) List() []string {
-	db.lock.RLock()
-	defer db.lock.RUnlock()
-	ro := levigo.NewReadOptions()
-	ro.SetFillCache(false)
-	defer ro.Close()
-	it := db.db.NewIterator(ro)
-	ts := make([]string, 0)
-	for it.SeekToFirst(); it.Valid(); it.Next() {
-		k := it.Key()
-		if k[0] == 't' {
-			ts = append(ts, string(it.Key()))
-		}
-	}
-	return ts
-}
-
-func (db *TorrentDB) AddClient(w core.TorrentWriter) {
+// Fast path for getting torrents, if the channel blocks we close it.
+func (db *TorrentDB) AddTorrentClient(c chan *core.Torrent) {
 	db.lock.Lock()
 	defer db.lock.Unlock()
-	ww := client.New(w)
-	db.writers = append(db.writers, ww)
-	ro := levigo.NewReadOptions()
-	ro.SetFillCache(false)
-	defer ro.Close()
-	it := db.db.NewIterator(ro)
-	for it.SeekToFirst(); it.Valid(); it.Next() {
-		k := it.Key()
-		if k[0] == 't' {
-			var t core.Torrent
-			err := json.Unmarshal(it.Value(), &t)
-			if err != nil {
-				log.Print(err)
-				continue
-			}
-			w.NewTorrent(&t)
-		} else if k[0] == 's' {
-			var s core.Signature
-			err := json.Unmarshal(it.Value(), &s)
-			if err != nil {
-				log.Print(err)
-				continue
-			}
-			w.NewSignature(&s)
-		}
-	}
+	db.writers = append(db.writers, c)
 }
