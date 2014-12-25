@@ -7,6 +7,16 @@ import (
 	"github.com/TheDistributedBay/TheDistributedBay/core"
 )
 
+func NumTorrents(d core.Database) int {
+	c := make(chan string)
+	go d.GetTorrents(c)
+	count := 0
+	for range c {
+		count += 1
+	}
+	return count
+}
+
 func TestDB(t *testing.T) {
 	db, err := NewTorrentDB("test.db")
 	if err != nil {
@@ -14,7 +24,7 @@ func TestDB(t *testing.T) {
 	}
 	defer os.RemoveAll("test.db")
 
-	if n := db.NumTorrents(); n != 0 {
+	if n := NumTorrents(db); n != 0 {
 		t.Fatal("Expected 0 torrents, got %d", n)
 	}
 
