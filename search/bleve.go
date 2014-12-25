@@ -21,6 +21,11 @@ func NewBleve(f string) (*Bleve, error) {
 	field.Store = false
 	doc.AddFieldMappingsAt("Name", field)
 	doc.AddFieldMappingsAt("Description", field)
+
+	field = bleve.NewNumericFieldMapping()
+	field.Store = false
+	doc.AddFieldMappingsAt("CategoryID", field)
+
 	mapping.DefaultMapping = doc
 	os.RemoveAll(f)
 	index, err := bleve.New(f, mapping)
@@ -53,8 +58,15 @@ func (b *Bleve) Exists(h string) error {
 	return err
 }
 
-func (b *Bleve) Search(term string, from int, size int) (*bleve.SearchResult, error) {
-	q := bleve.NewQueryStringQuery(term)
+func (b *Bleve) Search(term string, from, size int, category uint8) (*bleve.SearchResult, error) {
+	queries := []bleve.Query{bleve.NewQueryStringQuery(term)}
+	if category != 0 {
+		categoryStart := (float64)(category)
+		categoryEnd := categoryStart + 1
+		categoryQuery := bleve.NewNumericRangeQuery(&categoryStart, &categoryEnd)
+		queries = append(queries, categoryQuery)
+	}
+	q := bleve.NewConjunctionQuery(queries)
 	r := bleve.NewSearchRequestOptions(q, size, from, false)
 	return b.i.Search(r)
 }

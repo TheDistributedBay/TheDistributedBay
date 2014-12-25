@@ -10,6 +10,7 @@ import (
 	"html"
 	"io"
 	"time"
+  "strings"
 )
 
 var Trackers = [...]string{
@@ -55,6 +56,34 @@ func (t Torrent) Category() string {
 	}
 	return "Unknown"
 }
+
+func CategoryToId(category string) uint8 {
+  switch strings.ToLower(category) {
+  case "all":
+    return 0
+  case "anime":
+    return 1
+  case "software":
+    return 2
+  case "games":
+    return 3
+  case "adult":
+    return 4
+  case "movies":
+    return 5
+  case "music":
+    return 6
+  case "other":
+    return 7
+  case "series & tv":
+    return 8
+  case "books":
+    return 9
+  }
+  return 0
+}
+
+
 func (t Torrent) NiceInfoHash() string {
 	return hex.EncodeToString(t.InfoHash)
 }

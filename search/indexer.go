@@ -8,18 +8,18 @@ import (
 )
 
 type Indexer struct {
-	indexes []*PriorityIndex
+	recentIndexes []*PriorityIndex
 }
 
 func NewIndexer(db core.Database) *Indexer {
-	indexes := make([]*PriorityIndex, 10)
-	for i, _ := range indexes {
+	recentIndexes := make([]*PriorityIndex, 10)
+	for i, _ := range recentIndexes {
 		index := make(PriorityIndex, 0)
 		heap.Init(&index)
-		indexes[i] = &index
+		recentIndexes[i] = &index
 	}
 	indexer := Indexer{
-		indexes,
+		recentIndexes,
 	}
 	go indexer.NewTorrent(db)
 
@@ -32,7 +32,7 @@ func (i *Indexer) Index(t *core.Torrent) {
 }
 
 func (i *Indexer) addItemToCategory(t *core.Torrent, category uint8) {
-	index := i.indexes[category]
+	index := i.recentIndexes[category]
 	heap.Push(index, &TorrentIndex{
 		torrent:  t,
 		priority: t.CreatedAt.Unix(),
@@ -43,7 +43,7 @@ func (i *Indexer) addItemToCategory(t *core.Torrent, category uint8) {
 }
 
 func (i *Indexer) NewTorrent(db core.Database) {
-	c := make(chan *core.Torrent, 2)
+	c := make(chan *core.Torrent, 100)
 	db.AddTorrentClient(c)
 
 	for t := range c {

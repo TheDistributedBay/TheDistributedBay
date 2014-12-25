@@ -28,11 +28,12 @@ type TorrentBlob struct {
 
 func (th TorrentsHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query().Get("q")
+	category := core.CategoryToId(r.URL.Query().Get("category"))
 	p := 0
 	fmt.Sscan(r.URL.Query().Get("p"), &p)
 	b := TorrentBlob{}
 	if q != "" {
-		results, count, err := th.s.Search(q, 35*p, 35)
+		results, count, err := th.s.Search(q, 35*p, 35, category)
 		if err != nil {
 			log.Print(err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
