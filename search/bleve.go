@@ -1,6 +1,7 @@
 package search
 
 import (
+	"errors"
 	"os"
 
 	"github.com/blevesearch/bleve"
@@ -54,8 +55,14 @@ func (b *Bleve) Flush() {
 }
 
 func (b *Bleve) Exists(h string) error {
-	_, err := b.i.Document(h)
-	return err
+	p, err := b.i.Document(h)
+	if err != nil {
+		return err
+	}
+	if p == nil {
+		return errors.New("no such document")
+	}
+	return nil
 }
 
 func (b *Bleve) Search(term string, from, size int, category uint8) (*bleve.SearchResult, error) {
