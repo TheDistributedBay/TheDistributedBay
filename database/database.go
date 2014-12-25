@@ -18,7 +18,8 @@ type TorrentDB struct {
 
 func NewTorrentDB(dir string) (*TorrentDB, error) {
 	opts := levigo.NewOptions()
-	opts.SetCache(levigo.NewLRUCache(10 << 20))
+	filter := levigo.NewBloomFilter(10)
+	opts.SetFilterPolicy(filter)
 	opts.SetCreateIfMissing(true)
 	defer opts.Close()
 	db, err := levigo.Open(dir, opts)
@@ -35,6 +36,7 @@ func (db *TorrentDB) GetTorrents(c chan string) {
 	ro.SetFillCache(false)
 	defer ro.Close()
 	it := db.db.NewIterator(ro)
+	defer it.Close()
 	for it.SeekToFirst(); it.Valid(); it.Next() {
 		k := it.Key()
 		if k[0] == 't' {
