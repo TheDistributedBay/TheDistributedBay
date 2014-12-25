@@ -13,7 +13,7 @@ func testTorrent(i string, c time.Time) *core.Torrent {
 }
 
 func simpleTorrent(hash, name, description string, c time.Time) *core.Torrent {
-	return &core.Torrent{hash, []byte("magnetlink"), name, description, 1, c, []string{"tags"}}
+	return &core.Torrent{hash, []byte("infohash"), name, description, 1, c, []string{"tags"}}
 }
 
 func TestBleve(t *testing.T) {
@@ -22,7 +22,7 @@ func TestBleve(t *testing.T) {
 		t.Fatal(err)
 	}
 	bleve.NewTorrent(simpleTorrent("t1", "foo", "", time.Now()))
-	r, err := bleve.Search("foo", 0, 10)
+	r, err := bleve.Search("foo", 0, 10, 0)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -31,7 +31,7 @@ func TestBleve(t *testing.T) {
 	}
 	bleve.NewBatchedTorrent(simpleTorrent("t2", "bar", "", time.Now()))
 	bleve.Flush()
-	r, err = bleve.Search("bar", 0, 10)
+	r, err = bleve.Search("bar", 0, 10, 0)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -41,7 +41,7 @@ func TestBleve(t *testing.T) {
 	// Double index see what happens
 	bleve.NewBatchedTorrent(simpleTorrent("t2", "bar", "", time.Now()))
 	bleve.Flush()
-	r, err = bleve.Search("bar", 0, 10)
+	r, err = bleve.Search("bar", 0, 10, 0)
 	if err != nil {
 		t.Fatal(err)
 	}

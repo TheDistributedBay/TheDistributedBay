@@ -46,19 +46,25 @@ func (s *Searcher) shovel() {
 	}
 }
 
-func (s *Searcher) Search(term string, from, size int, category uint8) ([]*core.Torrent, uint64, error) {
-	result, err := s.b.Search(term, from, size, category)
+func (s *Searcher) Search(term string, from, size int, category uint8) ([]*core.Torrent, int, error) {
+	result, err := s.b.Search(term, 0, 100000000)
 	if err != nil {
 		return nil, 0, err
 	}
-	torrents := make([]*core.Torrent, 0, len(result.Hits))
+	torrents := make([]*core.Torrent, 0, size)
+	matchCount := 0
 	for _, e := range result.Hits {
 		t, err := s.db.Get(e.ID)
 		if err != nil {
 			log.Print("Stale torrent in index %s", e.ID)
 			continue
 		}
-		torrents = append(torrents, t)
+		if category == 0 || t.CategoryID == category {
+			if matchCount >= from && matchCount < (from+size) {
+				torrents = append(torrents, t)
+			}
+			matchCount += 1
+		}
 	}
-	return torrents, result.Total, nil
+	return torrents, matchCount, nil
 }
