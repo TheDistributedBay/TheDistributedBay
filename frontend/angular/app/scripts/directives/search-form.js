@@ -11,10 +11,10 @@ angular.module('theDistributedBayApp')
     return {
       templateUrl: 'views/search-form.html',
       restrict: 'E',
-      link: function postLink(scope, element, attrs) {
-        scope.categories = [{
+      controller: function ($scope, $rootScope, $location) {
+        $scope.categories = [{
           name: 'All',
-          checked: true,
+          checked: false,
         }, {
           name: 'Anime',
           checked: false,
@@ -43,10 +43,18 @@ angular.module('theDistributedBayApp')
           name: 'Books',
           checked: false,
         }];
-      },
-      controller: function ($scope, $rootScope, $location) {
         $scope.query = $location.search().q;
         $scope.page = $location.search().p || 0;
+        var category = $location.search().category;
+        if (category) {
+          _.each(category.split(','), function(category) {
+            _.each($scope.categories, function(cat) {
+              if (category === cat.name) {
+                cat.checked = true;
+              }
+            });
+          });
+        }
         function updateSearch() {
           if ($scope.query) {
             if ($location.path() !== '/search') {
@@ -107,6 +115,7 @@ angular.module('theDistributedBayApp')
           }
           updateSearch();
         }
+        $scope.checked($scope.categories[1]);
       }
     };
   });

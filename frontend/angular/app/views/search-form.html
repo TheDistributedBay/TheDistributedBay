@@ -16,8 +16,7 @@
   </p>
   <p id="chb">
     <label ng-repeat="category in categories" title="{{category.name}}">
-      <input name="categories[]" type="checkbox" ng-model="category.checked" ng-click="checked(category)">
-      {{category.name}}
+      <input name="categories[]" type="checkbox" ng-model="category.checked" ng-click="checked(category)">{{category.name}}
     </label>
   </p>
   <p id="subm">

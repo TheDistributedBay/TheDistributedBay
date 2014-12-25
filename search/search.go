@@ -59,13 +59,13 @@ func (s *Searcher) Search(term string, from, size int, categories []uint8) ([]*c
 			log.Print("Stale torrent in index %s", e.ID)
 			continue
 		}
-    included := false
-    for _, category := range categories {
-      if category == t.CategoryID {
-        included = true
-        break
-      }
-    }
+		included := false
+		for _, category := range categories {
+			if category == t.CategoryID {
+				included = true
+				break
+			}
+		}
 		if len(categories) == 0 || categories[0] == 0 || included {
 			if matchCount >= from && matchCount < (from+size) {
 				torrents = append(torrents, t)
