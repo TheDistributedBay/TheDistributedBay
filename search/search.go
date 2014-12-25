@@ -46,7 +46,7 @@ func (s *Searcher) shovel() {
 	}
 }
 
-func (s *Searcher) Search(term string, from, size int, category uint8) ([]*core.Torrent, int, error) {
+func (s *Searcher) Search(term string, from, size int, categories []uint8) ([]*core.Torrent, int, error) {
 	result, err := s.b.Search(term, 0, 100000000)
 	if err != nil {
 		return nil, 0, err
@@ -59,7 +59,14 @@ func (s *Searcher) Search(term string, from, size int, category uint8) ([]*core.
 			log.Print("Stale torrent in index %s", e.ID)
 			continue
 		}
-		if category == 0 || t.CategoryID == category {
+    included := false
+    for _, category := range categories {
+      if category == t.CategoryID {
+        included = true
+        break
+      }
+    }
+		if len(categories) == 0 || categories[0] == 0 || included {
 			if matchCount >= from && matchCount < (from+size) {
 				torrents = append(torrents, t)
 			}

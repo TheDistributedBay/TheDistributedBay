@@ -37,12 +37,13 @@ angular.module('theDistributedBayApp')
       $scope.query = search.q;
       window.scrollTo(window.scrollX,0)
     });
-    $scope.$watchGroup(['query', 'page'], function() {
+    $scope.$watchGroup(['query', 'page', 'category'], function() {
       $scope.loading = true;
       console.log('page', $scope.page);
       var defer = data.search({
         q: $scope.query,
-        p: $location.search().p
+        p: $location.search().p,
+        category: $location.search().category
       }).then(function(result) {
         console.log("Search results", result);
         $scope.torrents = result.Torrents;
