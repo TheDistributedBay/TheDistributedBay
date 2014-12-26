@@ -37,19 +37,20 @@ type TrackerResponse struct {
 	Error   error
 }
 
-func ScrapeTrackers(scrapeList []string, infoHashes []string) ([]InfoHashRange, error) {
+func ScrapeTrackers(scrapeList []string, infoHashes []string) ([]*InfoHashRange, error) {
 	resp := make(chan TrackerResponse, len(scrapeList))
 	for _, tracker := range scrapeList {
 		go queryTracker(infoHashes, tracker, resp)
 	}
 	responseCount := 0
 	errorCount := 0
-	bestDetails := make([]InfoHashRange, len(infoHashes))
+	bestDetails := make([]*InfoHashRange, len(infoHashes))
 	for i, hash := range infoHashes {
-		bestDetails[i].InfoHash = hash
+		bestDetails[i] = &InfoHashRange{InfoHash: hash}
 	}
 	for trackerResp := range resp {
 		if trackerResp.Error != nil {
+			log.Println("Tracker error:", trackerResp.Error)
 			errorCount += 1
 		} else {
 			for i, detail := range trackerResp.Details {

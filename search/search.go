@@ -4,10 +4,18 @@ import (
 	"log"
 	"time"
 
+	"github.com/mattbaird/elastigo/lib"
+
 	"github.com/TheDistributedBay/TheDistributedBay/core"
 )
 
-func NewSearcher(db core.Database, dir string) (*Searcher, error) {
+type SearchProvider interface {
+	Exists(hash string) error
+	NewBatchedTorrent(t *core.Torrent)
+	Search(term string, from, size int, categories []uint8, sort string) (*elastigo.Hits, error)
+}
+
+func NewSearcher(db core.Database) (*Searcher, error) {
 	b, err := NewElastic("localhost")
 	if err != nil {
 		return nil, err
@@ -18,7 +26,7 @@ func NewSearcher(db core.Database, dir string) (*Searcher, error) {
 }
 
 type Searcher struct {
-	b  *Elastic
+	b  SearchProvider
 	db core.Database
 }
 
@@ -51,7 +59,7 @@ func (s *Searcher) Search(term string, from, size int, categories []uint8, sort 
 		return nil, 0, err
 	}
 	torrents := make([]*core.Torrent, 0, size)
-	for _, e := range result.Hits.Hits {
+	for _, e := range result.Hits {
 		t, err := s.db.Get(e.Id)
 		if err != nil {
 			log.Print("Stale torrent in index %s", e.Id)
@@ -59,5 +67,5 @@ func (s *Searcher) Search(term string, from, size int, categories []uint8, sort 
 		}
 		torrents = append(torrents, t)
 	}
-	return torrents, result.Hits.Total, nil
+	return torrents, result.Total, nil
 }

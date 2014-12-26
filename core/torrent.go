@@ -7,13 +7,13 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"html"
 	"io"
+	"net/url"
 	"strings"
 	"time"
 )
 
-var Trackers = [...]string{
+var Trackers = []string{
 	"udp://open.demonii.com:1337/announce",
 	"udp://tracker.publicbt.com:80/announce",
 	"udp://tracker.istole.it:80/announce",
@@ -91,7 +91,7 @@ func (t Torrent) NiceInfoHash() string {
 }
 func (t Torrent) MagnetLink() string {
 	infoHash := t.NiceInfoHash()
-	name := html.EscapeString(t.Name)
+	name := url.QueryEscape(t.Name)
 	magnet := fmt.Sprintf("magnet:?xt=urn:btih:%s&dn=%s", infoHash, name)
 
 	for _, tracker := range Trackers {

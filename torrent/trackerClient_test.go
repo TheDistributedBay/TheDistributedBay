@@ -1,12 +1,13 @@
 package torrent
 
 import (
+	"github.com/TheDistributedBay/TheDistributedBay/core"
 	"testing"
 )
 
 func TestTorrentInfoRetrevial(t *testing.T) {
 	infoHashes := []string{
-		"A06131D93965BCA27A04CCB9A54CACEB1F5FBCB1",
+		"A06130D93965BCA27A04CCB9A54CACEB1F5FBCB1",
 		"18A025ADEE8D14F468A7749AD8FB751CBA1A788C",
 		"D18B786E32D43705AD37DF09A10A0F5B9173111E",
 		"C4477073A96A9BED8B739E1BAE477731282243C3",
@@ -59,7 +60,7 @@ func BenchmarkScrape(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		ScrapeTrackers(
-			[]string{"udp://open.demonii.com:1337/scrape"},
+			core.Trackers,
 			[]string{"A06130D93965BCA27A04CCB9A54CACEB1F5FBCB1"})
 	}
 }

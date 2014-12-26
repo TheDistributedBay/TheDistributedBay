@@ -16,7 +16,7 @@ func TestMerkle(t *testing.T) {
 	ts := make([]*Torrent, 0)
 
 	for i := 0; i < 5; i++ {
-		r := CreateTorrent([]byte(fmt.Sprint(i)), "n", "d", "cat", time.Now(), []string{"tag"})
+		r := CreateTorrent([]byte(fmt.Sprint(i)), "n", "d", "cat", time.Now(), []string{"tag"}, 0, 0, 0, 0)
 		ts = append(ts, r)
 	}
 
