@@ -71,9 +71,6 @@ func hash(a, b string) string {
 }
 
 func buildMerkle(ts []*Torrent) *MerkleNode {
-	if len(ts) == 0 {
-		panic("This should never happen")
-	}
 	if len(ts) == 1 {
 		return &MerkleNode{ts[0].Hash, nil, nil}
 	}
