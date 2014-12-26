@@ -71,7 +71,7 @@ func (sp *TestSearchProvider) Search(term string, from, size int, categories []u
 
 func TestSearcherCreation(t *testing.T) {
 	db := TestDB{}
-	s, err := NewSearcher(&db)
+	s, err := NewSearcher(&db, "thedistributedbay_test")
 	if err != nil {
 		t.Fatal(err)
 	}

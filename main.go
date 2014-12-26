@@ -56,7 +56,7 @@ func main() {
 	go stats.ReportStats(db, cm)
 	go torrent.DiscoverPeers(cm, *listen)
 
-	s, err := search.NewSearcher(db)
+	s, err := search.NewSearcher(db, "thedistributedbay")
 	if err != nil {
 		log.Fatal("Error opening index", err)
 	}

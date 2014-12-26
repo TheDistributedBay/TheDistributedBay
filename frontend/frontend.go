@@ -22,10 +22,8 @@ func Serve(httpAddress *string, db core.Database, s *search.Searcher, devAssets 
 
 	r := mux.NewRouter()
 
-	apirouter, err := ApiRouter(db, s)
-	if err != nil {
-		log.Print(err)
-	}
+	apirouter := ApiRouter(db, s)
+
 	r.PathPrefix("/api/").Handler(apirouter)
 	if devAssets {
 		log.Println("Debug mode is on. Serving development assets from angular/app.")
@@ -41,19 +39,19 @@ func Serve(httpAddress *string, db core.Database, s *search.Searcher, devAssets 
 	}
 	http.Handle("/", r)
 	log.Println("Web server listening on", *httpAddress)
-	err = http.ListenAndServe(*httpAddress, nil)
+	err := http.ListenAndServe(*httpAddress, nil)
 	if err != nil {
 		log.Println(err)
 	}
 }
 
-func ApiRouter(db core.Database, s *search.Searcher) (*mux.Router, error) {
+func ApiRouter(db core.Database, s *search.Searcher) *mux.Router {
 	r := mux.NewRouter()
 	r.Methods("GET").Path("/api/search").Handler(SearchHandler{s, db})
 	r.Methods("POST").Path("/api/add_torrent").Handler(AddTorrentHandler{db})
 	r.Methods("GET").Path("/api/torrent").Handler(GetTorrentHandler{db})
 
-	return r, nil
+	return r
 }
 
 type hookedResponseWriter struct {

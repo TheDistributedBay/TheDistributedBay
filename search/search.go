@@ -14,8 +14,8 @@ type SearchProvider interface {
 	Search(term string, from, size int, categories []uint8, sort string) (*elastigo.Hits, error)
 }
 
-func NewSearcher(db core.Database) (*Searcher, error) {
-	b, err := NewElastic("localhost")
+func NewSearcher(db core.Database, index string) (*Searcher, error) {
+	b, err := NewElastic("localhost", index)
 	if err != nil {
 		return nil, err
 	}

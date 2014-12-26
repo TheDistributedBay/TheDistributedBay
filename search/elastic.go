@@ -10,25 +10,26 @@ import (
 )
 
 type Elastic struct {
-	c *elastigo.Conn
-	b *elastigo.BulkIndexer
+	c     *elastigo.Conn
+	b     *elastigo.BulkIndexer
+	index string
 }
 
-func NewElastic(host string) (*Elastic, error) {
+func NewElastic(host string, index string) (*Elastic, error) {
 	c := elastigo.NewConn()
 	c.Domain = host
 	b := c.NewBulkIndexer(10)
 	b.Start()
-	return &Elastic{c, b}, nil
+	return &Elastic{c, b, index}, nil
 }
 
 func (e *Elastic) NewTorrent(t *core.Torrent) {
-	e.c.Index("thedistributedbay", "torrent", t.Hash, nil, t)
+	e.c.Index(e.index, "torrent", t.Hash, nil, t)
 	e.c.Flush()
 }
 
 func (e *Elastic) NewBatchedTorrent(t *core.Torrent) {
-	e.b.Index("thedistributedbay", "torrent", t.Hash, "", nil, t, false)
+	e.b.Index(e.index, "torrent", t.Hash, "", nil, t, false)
 }
 
 func (e *Elastic) Flush() {
@@ -36,7 +37,7 @@ func (e *Elastic) Flush() {
 }
 
 func (e *Elastic) Exists(h string) error {
-	resp, err := e.c.ExistsBool("thedistributedbay", "torrent", h, nil)
+	resp, err := e.c.ExistsBool(e.index, "torrent", h, nil)
 	if err != nil {
 		return err
 	}
@@ -69,7 +70,7 @@ func (e *Elastic) Search(term string, from, size int, categories []uint8, sort s
 		"size": size,
 		"sort": sort,
 	}
-	results, err := e.c.SearchUri("thedistributedbay", "torrent", params)
+	results, err := e.c.SearchUri(e.index, "torrent", params)
 	if err != nil {
 		return nil, err
 	}

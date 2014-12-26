@@ -9,7 +9,7 @@ import (
 
 func TestNewElastic(t *testing.T) {
 	host := "localhost"
-	e, err := NewElastic(host)
+	e, err := NewElastic(host, "thedistributedbay_test")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -19,7 +19,7 @@ func TestNewElastic(t *testing.T) {
 }
 
 func TestElasticNewTorrent(t *testing.T) {
-	e, err := NewElastic("localhost")
+	e, err := NewElastic("localhost", "thedistributedbay_test")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -56,7 +56,7 @@ func TestElasticNewTorrent(t *testing.T) {
 
 func TestElasticSearch(t *testing.T) {
 
-	e, err := NewElastic("localhost")
+	e, err := NewElastic("localhost", "thedistributedbay_test")
 	if err != nil {
 		t.Fatal(err)
 	}
