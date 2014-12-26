@@ -25,6 +25,15 @@ func TestMerkle(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	s2, err := SignTorrents(k, ts[:2])
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if s2.Hash() == s.Hash() {
+		t.Fatal("Hashes should be different %v v %v", s2.Hash(), s.Hash())
+	}
+
 	err = s.VerifySignature()
 	if err != nil {
 		t.Fatal(err)
@@ -40,5 +49,41 @@ func TestMerkle(t *testing.T) {
 		if !found {
 			t.Fatal("Couldn't find torrent %s in %v", r.Hash, s.ListTorrents())
 		}
+	}
+
+	// Make sure merkle verification fails.
+	s.R.SetUint64(1)
+	if s.VerifySignature() == nil {
+		t.Fatal("Changing sig should cause failures")
+	}
+
+	s, err = SignTorrents(k, ts)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	s.Key.Curve = "badkey"
+	if s.VerifySignature() == nil {
+		t.Fatal("Changing key should cause failures")
+	}
+
+	s, err = SignTorrents(k, ts)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	s.M.l.r.hash = "badhash"
+	if s.VerifySignature() == nil {
+		t.Fatal("Changing key should cause failures")
+	}
+
+	s, err = SignTorrents(k, ts)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	s.M.r.l.hash = "badhash"
+	if s.VerifySignature() == nil {
+		t.Fatal("Changing key should cause failures")
 	}
 }
