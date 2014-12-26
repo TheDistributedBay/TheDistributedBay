@@ -13,7 +13,7 @@ import (
 )
 
 func createDefaultTorrent(d string) *core.Torrent {
-	return core.CreateTorrent([]byte("magnetlink"), "name", d, "category", time.Now(), nil)
+	return core.CreateTorrent([]byte("magnetlink"), "name", d, "category", time.Now(), nil, 0, 0, 0, 0)
 }
 
 type sewer struct {
