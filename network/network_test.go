@@ -111,6 +111,10 @@ func TestSingleHop(t *testing.T) {
 		t.Errorf("Expected torrent with %v, got %v", t1, recv)
 	}
 
+	if cm1.NumPeers() != 1 {
+		t.Errorf("Expected 1 peer not %d", cm1.NumPeers())
+	}
+
 	cm1.Close()
 	cm2.Close()
 }
