@@ -45,8 +45,8 @@ func (s *Searcher) shovel() {
 	}
 }
 
-func (s *Searcher) Search(term string, from, size int, categories []uint8) ([]*core.Torrent, int, error) {
-	result, err := s.b.Search(term, from, size, categories)
+func (s *Searcher) Search(term string, from, size int, categories []uint8, sort string) ([]*core.Torrent, int, error) {
+	result, err := s.b.Search(term, from, size, categories, sort)
 	if err != nil {
 		return nil, 0, err
 	}

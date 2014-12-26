@@ -19,7 +19,9 @@ type SearchHandler struct {
 
 type searchResult struct {
 	Name, MagnetLink, Hash, Category string
+	Size                             uint64
 	CreatedAt                        time.Time
+	Seeders, Leechers, Completed     core.Range
 }
 
 type TorrentBlob struct {
@@ -29,6 +31,7 @@ type TorrentBlob struct {
 
 func (th SearchHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query().Get("q")
+	sort := r.URL.Query().Get("sort")
 	categories := strings.Split(r.URL.Query().Get("category"), ",")
 	categoryIds := make([]uint8, len(categories))
 	for i, category := range categories {
@@ -40,7 +43,7 @@ func (th SearchHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	var results []*core.Torrent
 	var count int
 
-	results, count, err := th.s.Search(q, 35*p, 35, categoryIds)
+	results, count, err := th.s.Search(q, 35*p, 35, categoryIds, sort)
 	if err != nil {
 		log.Print(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -55,6 +58,10 @@ func (th SearchHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			Hash:       result.Hash,
 			Category:   result.Category(),
 			CreatedAt:  result.CreatedAt,
+			Size:       result.Size,
+			Seeders:    result.Seeders,
+			Leechers:   result.Leechers,
+			Completed:  result.Completed,
 		}
 	}
 	b.Pages = count / 35

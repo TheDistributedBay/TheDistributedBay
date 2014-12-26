@@ -11,19 +11,19 @@
     </tr>
     <tr>
     <th>Size:</th>
-    <td>{{torrent.Size}}</td>
+    <td>{{humanFileSize(torrent.Size)}}</td>
     </tr>
     <tr>
     <th>Seeders:</th>
-    <td>{{torrent.Seeders}}</td>
+    <td>{{torrent.Seeders.Min}}-{{torrent.Seeders.Max}}</td>
     </tr>
     <tr>
     <th>Leechers:</th>
-    <td>{{torrent.Leechers}}</td>
+    <td>{{torrent.Leechers.Min}}-{{torrent.Leechers.Max}}</td>
     </tr>
     <tr>
     <th>Completed:</th>
-    <td>{{torrent.Leechers}}</td>
+    <td>{{torrent.Completed.Min}}-{{torrent.Completed.Max}}</td>
     </tr>
     <tr>
       <th>Info Hash:</th>

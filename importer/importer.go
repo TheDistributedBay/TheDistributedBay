@@ -8,6 +8,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -40,6 +41,11 @@ func ProduceTorrents(file string, c chan *core.Torrent, d chan *core.Torrent) {
 
 		name := html.UnescapeString(rec[0])
 
+		size, err := strconv.Atoi(rec[1])
+		if err != nil {
+			log.Print(err)
+		}
+
 		created := time.Now()
 
 		infoHash, err := hex.DecodeString(rec[2])
@@ -48,11 +54,23 @@ func ProduceTorrents(file string, c chan *core.Torrent, d chan *core.Torrent) {
 			continue
 		}
 
-		category := rec[4]
-		//seeder := rec[5]
-		//leecher := rec[6]
+		files, err := strconv.Atoi(rec[3])
+		if err != nil {
+			log.Print(err)
+		}
 
-		t := core.CreateTorrent(infoHash, name, "from db dump", category, created, nil)
+		category := rec[4]
+		seeders, err := strconv.Atoi(rec[5])
+		if err != nil {
+			log.Print(err)
+		}
+		leechers, err := strconv.Atoi(rec[6])
+		if err != nil {
+			log.Print(err)
+		}
+
+		t := core.CreateTorrent(infoHash, name, "from db dump", category, created, nil,
+			(uint64)(size), (uint)(files), (uint)(seeders), (uint)(leechers))
 		if err != nil {
 			log.Print(err)
 			continue

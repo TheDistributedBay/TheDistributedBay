@@ -13,23 +13,14 @@ import (
 	"net/http"
 	"net/url"
 	"time"
+
+	"github.com/TheDistributedBay/TheDistributedBay/core"
 )
 
 // Code to talk to trackers.
 // Implements:
 //  BEP 12 Multitracker Metadata Extension
 //  BEP 15 UDP Tracker Protocol
-
-type Range struct {
-	Min, Max uint
-}
-
-func (r *Range) Update(val uint) {
-	r.Max += val
-	if r.Min < val {
-		r.Min = val
-	}
-}
 
 type InfoHashDetails struct {
 	InfoHash                     string
@@ -38,7 +29,7 @@ type InfoHashDetails struct {
 
 type InfoHashRange struct {
 	InfoHash                     string
-	Seeders, Leechers, Completed Range
+	Seeders, Leechers, Completed core.Range
 }
 
 type TrackerResponse struct {

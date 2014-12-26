@@ -11,18 +11,20 @@ angular.module('theDistributedBayApp')
     return {
       templateUrl: 'views/torrent-display.html',
       restrict: 'E',
-      controller: function($scope, $location) {
+      controller: function($scope, $location, helpers) {
         $scope.headers = ['Age', 'Size', 'Seeders', 'Leechers'];
         $scope.sanitize = helpers.sanitizeName;
-        $scope.sort = $location.search().sort;
+        var pieces = ($location.search().sort || '').split(':');
+        $scope.sort = pieces[0];
+        $scope.sortDir = pieces[1] || 'desc';
         $scope.sortBy = function(header) {
-          $scope.sort = header;
         };
         $scope.$watch('torrents', function() {
           _.each($scope.torrents, function(torrent) {
             torrent.TimeAgo = moment(torrent.CreatedAt).fromNow();
           });
         });
+        $scope.humanFileSize = helpers.humanFileSize;
       }
     };
   });

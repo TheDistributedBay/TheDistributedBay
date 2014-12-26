@@ -15,7 +15,8 @@ type GetTorrentHandler struct {
 type torrentResult struct {
 	Name, MagnetLink, Hash, InfoHash, Category string
 	CreatedAt                                  time.Time
-	Seeders, Leechers, Completed               int
+	Seeders, Leechers, Completed               core.Range
+	Size                                       uint64
 }
 
 func (th GetTorrentHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -38,6 +39,10 @@ func (th GetTorrentHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		InfoHash:   torrent.NiceInfoHash(),
 		Category:   torrent.Category(),
 		CreatedAt:  torrent.CreatedAt,
+		Size:       torrent.Size,
+		Seeders:    torrent.Seeders,
+		Leechers:   torrent.Leechers,
+		Completed:  torrent.Completed,
 	}
 
 	js, err := json.Marshal(result)

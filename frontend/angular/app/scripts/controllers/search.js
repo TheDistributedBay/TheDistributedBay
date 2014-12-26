@@ -24,8 +24,12 @@ angular.module('theDistributedBayApp')
       }).join('&');
     }
     $scope.currentSearchWithSort = function(sort) {
+      var dir = 'desc';
+      if (sort === $scope.sort) {
+        dir = $scope.sortDir === 'desc' ? 'asc' : 'desc';
+      }
       var search = _.clone($location.search());
-      search.sort = sort;
+      search.sort = sort + ':' + dir;
       delete search.p;
 
       return $location.path() + '?' + _.map(search, function(v, k) {
@@ -47,13 +51,25 @@ angular.module('theDistributedBayApp')
       var search = $location.search();
       $scope.page = currentPage();
       $scope.query = search.q;
+      var pieces = ($location.search().sort || '').split(':');
+      $scope.sort = pieces[0];
+      $scope.sortDir = pieces[1] || 'desc';
       window.scrollTo(window.scrollX,0)
     });
-    $scope.$watchGroup(['query', 'page', 'category'], function() {
+    $scope.$watchGroup(['query', 'page', 'category', 'sort', 'sortDir'], function() {
       $scope.loading = true;
-      var defer = data.search({
-        q: $scope.query,
-        p: $location.search().p,
+      var sort = '';
+      console.log($scope.sort, $location.search());
+      if ($scope.sort) {
+        sort = ($scope.sort.replace(/Age/g, 'CreatedAt') + ':' + $scope.sortDir).
+          replace(/Seeders:/g, 'Seeders.Min:').
+          replace(/Leechers:/g, 'Leechers.Min:').
+          replace(/Completed:/g, 'Completed.Min:');
+      }
+      data.search({
+        q: $scope.query || '',
+        p: $location.search().p || '',
+        sort: sort,
         category: $location.search().category
       }).then(function(result) {
         console.log("Search results", result);

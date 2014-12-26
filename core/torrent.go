@@ -23,12 +23,15 @@ type Torrent struct {
 	// Hash of everything in this struct
 	Hash string
 	// Torrent information
-	InfoHash    []byte
-	Name        string
-	Description string
-	CategoryID  uint8
-	CreatedAt   time.Time
-	Tags        []string
+	InfoHash                     []byte
+	Name                         string
+	Description                  string
+	Size                         uint64
+	CategoryID                   uint8
+	CreatedAt                    time.Time
+	Tags                         []string
+	Files                        uint
+	Seeders, Leechers, Completed Range
 }
 
 func (t Torrent) Category() string {
@@ -98,8 +101,10 @@ func (t Torrent) MagnetLink() string {
 	return magnet
 }
 
-func CreateTorrent(infoHash []byte, name, description string, categoryid string, createdAt time.Time, tags []string) *Torrent {
-	t := &Torrent{"", infoHash, name, description, 1, createdAt, tags}
+func CreateTorrent(infoHash []byte, name, description string, category string, createdAt time.Time, tags []string, size uint64, files, seeders, leechers uint) *Torrent {
+	category_id := CategoryToId(category)
+	t := &Torrent{"", infoHash, name, description, size, category_id, createdAt,
+		tags, files, NewRange(seeders), NewRange(leechers), NewRange(0)}
 	t.CalculateHash()
 	return t
 }

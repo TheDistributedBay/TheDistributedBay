@@ -6,7 +6,8 @@
         <th ng-repeat="header in headers" class="{{header}}-column">
           <a href="{{currentSearchWithSort(header)}}" ng-click="sortBy(header)">
             {{header}}
-            <i ng-if="sort == header" class="fa fa-caret-down"></i>
+            <i ng-if="sort == header && sortDir == 'desc'" class="fa fa-caret-down"></i>
+            <i ng-if="sort == header && sortDir == 'asc'" class="fa fa-caret-up"></i>
           </a>
         </th>
       </tr>
@@ -25,9 +26,11 @@
           </div>
         </td>
         <td class="Age-column">{{torrent.TimeAgo}}</td>
-        <td class="Size-column">{{torrent.Size}}</td>
-        <td class="Seeders-column">{{torrent.Seeders}}</td>
-        <td class="Leechers-column">{{torrent.Leechers}}</td>
+        <td class="Size-column">{{humanFileSize(torrent.Size)}}</td>
+        <td class="Seeders-column" ng-if="torrent.Seeders.Min == torrent.Seeders.Max">{{torrent.Seeders.Min}}</td>
+        <td class="Seeders-column" ng-if="torrent.Seeders.Min != torrent.Seeders.Max">{{torrent.Seeders.Min}}-{{torrent.Seeders.Max}}</td>
+        <td class="Leechers-column" ng-if="torrent.Leechers.Min == torrent.Leechers.Max">{{torrent.Leechers.Min}}</td>
+        <td class="Leechers-column" ng-if="torrent.Leechers.Min != torrent.Leechers.Max">{{torrent.Leechers.Min}}-{{torrent.Leechers.Max}}</td>
       </tr>
     </tbody>
   </table>

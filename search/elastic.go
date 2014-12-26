@@ -46,7 +46,7 @@ func (e *Elastic) Exists(h string) error {
 	return errors.New("no such document")
 }
 
-func (e *Elastic) Search(term string, from, size int, categories []uint8) (elastigo.SearchResult, error) {
+func (e *Elastic) Search(term string, from, size int, categories []uint8, sort string) (elastigo.SearchResult, error) {
 	query := ""
 	if len(term) > 0 {
 		query += "(" + term + ")"
@@ -63,9 +63,11 @@ func (e *Elastic) Search(term string, from, size int, categories []uint8) (elast
 		}
 		query += ")"
 	}
-	return e.c.SearchUri("thedistributedbay", "torrent", map[string]interface{}{
+	params := map[string]interface{}{
 		"q":    query,
 		"from": from,
 		"size": size,
-	})
+		"sort": sort,
+	}
+	return e.c.SearchUri("thedistributedbay", "torrent", params)
 }
