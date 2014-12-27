@@ -4,7 +4,7 @@
       <tr>
         <th class="title-row">Torrents</th>
         <th ng-repeat="header in headers" class="{{header}}-column">
-          <a href="{{currentSearchWithSort(header)}}" ng-click="sortBy(header)">
+          <a href="{{currentSearchWithSort(header, sort, sortDir)}}" ng-click="sortBy(header)">
             {{header}}
             <i ng-if="sort == header && sortDir == 'desc'" class="fa fa-caret-down"></i>
             <i ng-if="sort == header && sortDir == 'asc'" class="fa fa-caret-up"></i>

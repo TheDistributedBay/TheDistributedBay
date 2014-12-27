@@ -35,4 +35,18 @@ describe('Service: helpers', function () {
       d: 0
     });
   });
+
+  it('should should return currentSearchWithSort', function () {
+    expect(helpers.currentSearchWithSort('Age', 'Seeders', 'desc')).toBe('/?sort=Age:desc');
+    expect(helpers.currentSearchWithSort('Seeders', 'Seeders', 'desc')).toBe('/?sort=Seeders:asc');
+    expect(helpers.currentSearchWithSort('Seeders', 'Seeders', 'asc')).toBe('/?sort=Seeders:desc');
+    expect(helpers.currentSearchWithSort('Age', 'Seeders', 'asc')).toBe('/?sort=Age:desc');
+  });
+
+  it('should correctly identify the recent route', inject(function($location) {
+    expect(helpers.isRecent()).toBeFalsy();
+    $location.path('/search');
+    $location.search({ sort: "Age:desc" });
+    expect(helpers.isRecent()).toBeTruthy();
+  }));
 });

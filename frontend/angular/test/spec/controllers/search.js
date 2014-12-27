@@ -28,18 +28,7 @@ describe('Controller: SearchCtrl', function () {
     expect(scope.pages).toBe(0);
     expect(scope.page).toBe(0);
   });
-  it('should should return currentSearchWithSort', function () {
-    scope.sortDir = 'desc';
-    scope.sort = 'Seeders';
-    expect(scope.currentSearchWithSort('Age')).toBe('/?sort=Age:desc');
 
-    expect(scope.currentSearchWithSort('Seeders')).toBe('/?sort=Seeders:asc');
-
-    scope.sortDir = 'asc';
-    expect(scope.currentSearchWithSort('Seeders')).toBe('/?sort=Seeders:desc');
-
-    expect(scope.currentSearchWithSort('Age')).toBe('/?sort=Age:desc');
-  });
   it('should set the page to 0 on query update and trigger a get request', function() {
     httpBackend.expectGET('/api/search?q=test&sort=Seeders.Min:desc');
 
