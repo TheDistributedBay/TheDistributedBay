@@ -49,8 +49,8 @@ angular.module('theDistributedBayApp')
 
     $scope.$on('$routeUpdate', function(){
       var search = $location.search();
-      $scope.page = currentPage();
       $scope.query = search.q;
+      $scope.page = currentPage();
       var pieces = ($location.search().sort || '').split(':');
       $scope.sort = pieces[0];
       $scope.sortDir = pieces[1] || 'desc';

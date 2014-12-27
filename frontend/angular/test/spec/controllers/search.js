@@ -18,7 +18,9 @@ describe('Controller: SearchCtrl', function () {
     });
 
     httpBackend = $httpBackend;
-    httpBackend.when('GET', '/api/search?q=test').
+    httpBackend.when('GET', '/api/search?q=test&sort=Seeders.Min:desc').
+      respond({ Torrents: [], Pages: 100 });
+    httpBackend.when('GET', '/api/search?q=test&p=1000&sort=CreatedAt:asc').
       respond({ Torrents: [], Pages: 100 });
   }));
 
@@ -39,9 +41,11 @@ describe('Controller: SearchCtrl', function () {
     expect(scope.currentSearchWithSort('Age')).toBe('/?sort=Age:desc');
   });
   it('should set the page to 0 on query update and trigger a get request', function() {
-    httpBackend.expectGET('/api/search?q=test');
+    httpBackend.expectGET('/api/search?q=test&sort=Seeders.Min:desc');
 
     scope.page = 10;
+    scope.sort = 'Seeders';
+    scope.sortDir = 'desc';
     scope.query = 'test';
     scope.$apply();
 
@@ -50,4 +54,17 @@ describe('Controller: SearchCtrl', function () {
     httpBackend.flush();
     expect(scope.pages).toBe(100);
   });
+  it('should update the scope variables on routeUpdate', inject(function($location) {
+    httpBackend.expectGET('/api/search?q=test&p=1000&sort=CreatedAt:asc');
+    $location.search({ p: 1000, q: 'test', sort: 'Age:asc' });
+    scope.$emit('$routeUpdate');
+    scope.$apply();
+    httpBackend.flush();
+
+    expect(scope.page).toBe(0);
+    expect(scope.pages).toBe(100);
+    expect(scope.query).toBe('test');
+    expect(scope.sort).toBe('Age');
+    expect(scope.sortDir).toBe('asc');
+  }));
 });

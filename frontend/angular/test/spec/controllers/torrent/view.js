@@ -9,14 +9,24 @@ describe('Controller: TorrentViewCtrl', function () {
     scope;
 
   // Initialize the controller and a mock scope
-  beforeEach(inject(function ($controller, $rootScope) {
+  beforeEach(inject(function ($controller, $rootScope, $location) {
     scope = $rootScope.$new();
+    $location.path('/torrent/testhash/some-name');
     TorrentViewCtrl = $controller('TorrentViewCtrl', {
-      $scope: scope
+      $scope: scope,
+      $routeParams: {
+        hash: 'testhash',
+      }
     });
   }));
 
-  /*it('should attach a list of awesomeThings to the scope', function () {
-    expect(scope.awesomeThings.length).toBe(3);
-  });*/
+  it('should make a search request and then display the information', inject(function($httpBackend) {
+    var resp = {Name: 'ducks'};
+    $httpBackend.when('GET', '/api/torrent?hash=testhash').
+      respond(resp);
+    $httpBackend.expectGET('/api/torrent?hash=testhash');
+    $httpBackend.flush();
+
+    expect(scope.torrent).toEqual(resp);
+  }));
 });

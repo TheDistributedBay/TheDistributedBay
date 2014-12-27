@@ -85,7 +85,6 @@ angular.module('theDistributedBayApp')
           $location.search(search);
         }
         function monitorChange(cur, old) {
-          console.log(cur, old);
           if (cur !== old) {
             delete $location.search().p;
             $scope.page = 0;

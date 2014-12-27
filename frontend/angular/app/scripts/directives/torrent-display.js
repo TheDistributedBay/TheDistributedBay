@@ -17,8 +17,6 @@ angular.module('theDistributedBayApp')
         var pieces = ($location.search().sort || '').split(':');
         $scope.sort = pieces[0];
         $scope.sortDir = pieces[1] || 'desc';
-        $scope.sortBy = function(header) {
-        };
         $scope.$watch('torrents', function() {
           _.each($scope.torrents, function(torrent) {
             torrent.TimeAgo = moment(torrent.CreatedAt).fromNow();

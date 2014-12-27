@@ -14,6 +14,7 @@ angular.module('theDistributedBayApp')
         MagnetLink: $scope.magnet,
         Name: $scope.name,
         Description: $scope.description,
+        CategoryID: parseInt($scope.category, 10),
         Tags: _.map($scope.tags.split(','), function(tag) {
           return tag.trim();
         })
