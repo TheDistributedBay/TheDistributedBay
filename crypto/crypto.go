@@ -13,7 +13,7 @@ import (
 )
 
 func NewKey() (*ecdsa.PrivateKey, error) {
-	return ecdsa.GenerateKey(elliptic.P224(), rand.Reader)
+	return ecdsa.GenerateKey(elliptic.P521(), rand.Reader)
 }
 
 type EncodedKey struct {
@@ -22,19 +22,19 @@ type EncodedKey struct {
 }
 
 func EncodeKey(k *ecdsa.PublicKey) *EncodedKey {
-	if k.Curve != elliptic.P224() {
+	if k.Curve != elliptic.P521() {
 		panic("Incorrect curve in use")
 	}
 
-	return &EncodedKey{"ecdsa:P224", k.X, k.Y}
+	return &EncodedKey{"ecdsa:P521", k.X, k.Y}
 }
 
 func LoadKey(e *EncodedKey) (*ecdsa.PublicKey, error) {
-	if e.Curve != "ecdsa:P224" {
+	if e.Curve != "ecdsa:P521" {
 		return nil, errors.New("unrecognized key type :" + e.Curve)
 	}
 	k := &ecdsa.PublicKey{}
-	k.Curve = elliptic.P224()
+	k.Curve = elliptic.P521()
 	k.X = e.X
 	k.Y = e.Y
 	return k, nil
