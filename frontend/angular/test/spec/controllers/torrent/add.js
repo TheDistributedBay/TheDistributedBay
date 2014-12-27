@@ -16,7 +16,31 @@ describe('Controller: TorrentAddCtrl', function () {
     });
   }));
 
-  it('should attach a list of awesomeThings to the scope', function () {
-    expect(scope.awesomeThings.length).toBe(3);
-  });
+  it('should be able to add torrents', inject(function($httpBackend) {
+    $httpBackend.when('POST', '/api/add_torrent').
+      respond({Name: 'ducks'});
+    var obj = {
+      Name: 'ducks',
+      MagnetLink: 'magnet:somelink',
+      Description: 'woof',
+      CategoryID: 2,
+      CreatedAt: new Date(),
+      Tags: ['blah','foo']
+    };
+    $httpBackend.expectPOST('/api/add_torrent', function(resp) {
+      var r = JSON.parse(resp);
+      obj.CreatedAt = r.CreatedAt;
+      expect(r).toEqual(obj);
+      return true;
+    });
+
+    scope.name = obj.Name;
+    scope.description = obj.Description;
+    scope.magnet = obj.MagnetLink;
+    scope.category = obj.CategoryID;
+    scope.tags = 'blah,foo';
+    scope.addTorrent();
+
+    $httpBackend.flush();
+  }));
 });

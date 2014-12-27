@@ -26,13 +26,37 @@ module.exports = function(config) {
       'bower_components/angular-route/angular-route.js',
       'bower_components/angular-sanitize/angular-sanitize.js',
       'bower_components/angular-touch/angular-touch.js',
+      'bower_components/lodash/dist/lodash.js',
+      'bower_components/moment/moment.js',
+      'bower_components/jquery/dist/jquery.js',
       'app/scripts/**/*.js',
+      'app/views/**/*.html',
       'test/mock/**/*.js',
       'test/spec/**/*.js'
     ],
 
     // list of files / patterns to exclude
     exclude: [],
+
+    // The test coverage reporter
+    reporters: ['progress', 'coverage'],
+
+    preprocessors: {
+      // source files, that you wanna generate coverage for
+      // do not include tests or libraries
+      // (these files will be instrumented by Istanbul)
+      'app/scripts/**/*.js': ['coverage'],
+
+      // HTML Template loader
+      'app/views/**/*.html': ['ng-html2js']
+    },
+
+    ngHtml2JsPreprocessor: {
+      // setting this option will create only a single module that contains templates
+      moduleName: 'templates',
+      stripPrefix: 'app/',
+    },
+
 
     // web server port
     port: 8080,
@@ -52,7 +76,9 @@ module.exports = function(config) {
     // Which plugins to enable
     plugins: [
       'karma-phantomjs-launcher',
-      'karma-jasmine'
+      'karma-jasmine',
+      'karma-coverage',
+      'karma-ng-html2js-preprocessor',
     ],
 
     // Continuous Integration mode

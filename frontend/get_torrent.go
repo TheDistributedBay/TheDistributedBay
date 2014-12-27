@@ -12,11 +12,12 @@ type GetTorrentHandler struct {
 	db core.Database
 }
 
-type torrentResult struct {
+type TorrentResult struct {
 	Name, MagnetLink, Hash, InfoHash, Category string
 	CreatedAt                                  time.Time
 	Seeders, Leechers, Completed               core.Range
 	Size                                       uint64
+	Files                                      uint
 }
 
 func (th GetTorrentHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -28,11 +29,11 @@ func (th GetTorrentHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	torrent, err := th.db.Get(hash)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
 
-	result := torrentResult{
+	result := TorrentResult{
 		Name:       torrent.Name,
 		MagnetLink: torrent.MagnetLink(),
 		Hash:       torrent.Hash,
@@ -43,6 +44,7 @@ func (th GetTorrentHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		Seeders:    torrent.Seeders,
 		Leechers:   torrent.Leechers,
 		Completed:  torrent.Completed,
+		Files:      torrent.Files,
 	}
 
 	js, err := json.Marshal(result)

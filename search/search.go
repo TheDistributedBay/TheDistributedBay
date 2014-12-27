@@ -2,7 +2,6 @@ package search
 
 import (
 	"log"
-	"time"
 
 	"github.com/mattbaird/elastigo/lib"
 
@@ -15,8 +14,8 @@ type SearchProvider interface {
 	Search(term string, from, size int, categories []uint8, sort string) (*elastigo.Hits, error)
 }
 
-func NewSearcher(db core.Database) (*Searcher, error) {
-	b, err := NewElastic("localhost")
+func NewSearcher(db core.Database, index string) (*Searcher, error) {
+	b, err := NewElastic("localhost", index)
 	if err != nil {
 		return nil, err
 	}
@@ -32,7 +31,6 @@ type Searcher struct {
 
 func (s *Searcher) shovel() {
 	for {
-		time.Sleep(30 * time.Second)
 		log.Print("Starting index run")
 		c := make(chan string)
 		go s.db.GetTorrents(c)
@@ -62,7 +60,7 @@ func (s *Searcher) Search(term string, from, size int, categories []uint8, sort 
 	for _, e := range result.Hits {
 		t, err := s.db.Get(e.Id)
 		if err != nil {
-			log.Print("Stale torrent in index %s", e.Id)
+			log.Print("Stale torrent in index ", e.Id)
 			continue
 		}
 		torrents = append(torrents, t)

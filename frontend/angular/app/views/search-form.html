@@ -5,9 +5,9 @@
   </a>
 </h1>
 <p id="navlinks">
-  <strong>Search Torrents</strong> |
-  <a href="/browse" title="Browse Torrents">Browse Torrents</a> |
-  <a href="/recent" title="Recent Torrents">Recent Torrents</a>
+  <a href="/search" ng-class="{active: isSearch()}" title="Search Torrents">Search Torrents</a> |
+  <a href="/browse" ng-class="{active: isBrowse()}" title="Browse Torrents">Browse Torrents</a> |
+  <a href="/search?sort=Age:desc" ng-class="{active: isRecent()}" title="Recent Torrents">Recent Torrents</a>
 </p>
 <form>
   <p id="inp">

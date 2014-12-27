@@ -138,6 +138,10 @@ search-form {
 
   #navlinks a {
     color: white;
+    &.active {
+      border-bottom: none;
+      font-weight: bold;
+    }
   }
 
   &.form-big {

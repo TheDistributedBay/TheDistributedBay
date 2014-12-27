@@ -11,7 +11,7 @@ angular.module('theDistributedBayApp')
     return {
       templateUrl: 'views/search-form.html',
       restrict: 'E',
-      controller: function ($scope, $rootScope, $location) {
+      controller: function ($scope, $rootScope, $location, helpers) {
         $scope.categories = [{
           name: 'All',
           checked: false,
@@ -85,7 +85,6 @@ angular.module('theDistributedBayApp')
           $location.search(search);
         }
         function monitorChange(cur, old) {
-          console.log(cur, old);
           if (cur !== old) {
             delete $location.search().p;
             $scope.page = 0;
@@ -124,6 +123,13 @@ angular.module('theDistributedBayApp')
           updateSearch();
         }
         $scope.checked($scope.categories[1]);
+        $scope.isRecent = helpers.isRecent;
+        $scope.isSearch = function() {
+          return !helpers.isRecent() && $location.path() === '/search';
+        }
+        $scope.isBrowse = function() {
+          return $location.path() === '/browse';
+        }
       }
     };
   });

@@ -10,7 +10,7 @@
  * Service in the theDistributedBayApp.
  */
 angular.module('theDistributedBayApp')
-  .service('data', function ($http, $q) {
+  .service('data', function ($http, $q, helpers) {
     var searchCancel;
     this.search = function(options) {
       if (searchCancel) {
@@ -19,6 +19,7 @@ angular.module('theDistributedBayApp')
       options = _.merge({
         q: ''
       }, options);
+      options = helpers.removeEmpty(options);
       var queryString = _.map(options, function(v, k) {
         return k + '=' + v;
       }).join('&');
@@ -53,8 +54,6 @@ angular.module('theDistributedBayApp')
         CreatedAt: new Date(),
         Tags: []
       }, options);
-
-      console.log('ADD TORRENT', options);
 
       $http.post('/api/add_torrent', options).
         success(function(data, status, headers, config) {
