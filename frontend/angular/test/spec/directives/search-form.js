@@ -12,9 +12,9 @@ describe('Directive: searchForm', function () {
     scope = $rootScope.$new();
   }));
 
-  it('should make hidden element visible', inject(function ($compile) {
+  /*it('should make hidden element visible', inject(function ($compile) {
     element = angular.element('<search-form></search-form>');
     element = $compile(element)(scope);
     expect(element.text()).toBe('this is the searchForm directive');
-  }));
+  }));*/
 });

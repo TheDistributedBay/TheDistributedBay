@@ -12,6 +12,13 @@
 angular.module('theDistributedBayApp')
   .service('data', function ($http, $q) {
     var searchCancel;
+    this.removeEmpty = function(object) {
+      _.each(object, function(v, k) {
+        if (v === undefined || v === '') {
+          delete object[k];
+        }
+      });
+    };
     this.search = function(options) {
       if (searchCancel) {
         searchCancel.resolve();
@@ -19,6 +26,7 @@ angular.module('theDistributedBayApp')
       options = _.merge({
         q: ''
       }, options);
+      this.removeEmpty(options);
       var queryString = _.map(options, function(v, k) {
         return k + '=' + v;
       }).join('&');
