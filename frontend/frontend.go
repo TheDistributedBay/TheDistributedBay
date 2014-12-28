@@ -13,16 +13,17 @@ import (
 
 	"github.com/TheDistributedBay/TheDistributedBay/core"
 	"github.com/TheDistributedBay/TheDistributedBay/search"
+	"github.com/TheDistributedBay/TheDistributedBay/torrent"
 )
 
-func Serve(httpAddress *string, db core.Database, s *search.Searcher, devAssets bool) {
+func Serve(httpAddress *string, db core.Database, s *search.Searcher, devAssets bool, updater *torrent.StatsUpdater) {
 
 	// Add SVG to mime directory
 	mime.AddExtensionType(".svg", "image/svg+xml")
 
 	r := mux.NewRouter()
 
-	apirouter := ApiRouter(db, s)
+	apirouter := ApiRouter(db, s, updater)
 
 	r.PathPrefix("/api/").Handler(apirouter)
 	if devAssets {
@@ -45,11 +46,11 @@ func Serve(httpAddress *string, db core.Database, s *search.Searcher, devAssets 
 	}
 }
 
-func ApiRouter(db core.Database, s *search.Searcher) *mux.Router {
+func ApiRouter(db core.Database, s *search.Searcher, updater *torrent.StatsUpdater) *mux.Router {
 	r := mux.NewRouter()
-	r.Methods("GET").Path("/api/search").Handler(SearchHandler{s, db})
+	r.Methods("GET").Path("/api/search").Handler(SearchHandler{s, db, updater})
 	r.Methods("POST").Path("/api/add_torrent").Handler(AddTorrentHandler{db})
-	r.Methods("GET").Path("/api/torrent").Handler(GetTorrentHandler{db})
+	r.Methods("GET").Path("/api/torrent").Handler(GetTorrentHandler{updater, db})
 
 	return r
 }

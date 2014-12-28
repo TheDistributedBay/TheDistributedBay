@@ -50,7 +50,6 @@ func ScrapeTrackers(scrapeList []string, infoHashes []string) ([]*InfoHashRange,
 	}
 	for trackerResp := range resp {
 		if trackerResp.Error != nil {
-			log.Println("Tracker error:", trackerResp.Error)
 			errorCount += 1
 		} else {
 			for i, detail := range trackerResp.Details {

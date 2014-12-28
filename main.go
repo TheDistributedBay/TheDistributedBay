@@ -61,7 +61,9 @@ func main() {
 		log.Fatal("Error opening index", err)
 	}
 
+	statsUpdater := torrent.NewStatsUpdater(s, db)
+
 	log.Println("Running...")
-	frontend.Serve(httpAddress, db, s, *devAssets)
+	frontend.Serve(httpAddress, db, s, *devAssets, statsUpdater)
 	cm.Close()
 }

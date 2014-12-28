@@ -6,10 +6,12 @@ import (
 	"time"
 
 	"github.com/TheDistributedBay/TheDistributedBay/core"
+	"github.com/TheDistributedBay/TheDistributedBay/torrent"
 )
 
 type GetTorrentHandler struct {
-	db core.Database
+	updater *torrent.StatsUpdater
+	db      core.Database
 }
 
 type TorrentResult struct {
@@ -27,24 +29,26 @@ func (th GetTorrentHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	torrent, err := th.db.Get(hash)
+	t, err := th.db.Get(hash)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
 
+	th.updater.QueueTorrent(t)
+
 	result := TorrentResult{
-		Name:       torrent.Name,
-		MagnetLink: torrent.MagnetLink(),
-		Hash:       torrent.Hash,
-		InfoHash:   torrent.NiceInfoHash(),
-		Category:   torrent.Category(),
-		CreatedAt:  torrent.CreatedAt,
-		Size:       torrent.Size,
-		Seeders:    torrent.Seeders,
-		Leechers:   torrent.Leechers,
-		Completed:  torrent.Completed,
-		Files:      torrent.Files,
+		Name:       t.Name,
+		MagnetLink: t.MagnetLink(),
+		Hash:       t.Hash,
+		InfoHash:   t.NiceInfoHash(),
+		Category:   t.Category(),
+		CreatedAt:  t.CreatedAt,
+		Size:       t.Size,
+		Seeders:    t.Seeders,
+		Leechers:   t.Leechers,
+		Completed:  t.Completed,
+		Files:      t.Files,
 	}
 
 	js, err := json.Marshal(result)

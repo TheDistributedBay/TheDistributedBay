@@ -51,6 +51,10 @@ func (s *Searcher) shovel() {
 	}
 }
 
+func (s *Searcher) NewBatchedTorrent(t *core.Torrent) {
+	s.b.NewBatchedTorrent(t)
+}
+
 func (s *Searcher) Search(term string, from, size int, categories []uint8, sort string) ([]*core.Torrent, int, error) {
 	result, err := s.b.Search(term, from, size, categories, sort)
 	if err != nil {
