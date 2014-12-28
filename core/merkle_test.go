@@ -31,7 +31,7 @@ func TestMerkle(t *testing.T) {
 	}
 
 	if s2.Hash() == s.Hash() {
-		t.Fatal("Hashes should be different %v v %v", s2.Hash(), s.Hash())
+		t.Fatalf("Hashes should be different %v v %v", s2.Hash(), s.Hash())
 	}
 
 	err = s.VerifySignature()
@@ -47,7 +47,7 @@ func TestMerkle(t *testing.T) {
 			}
 		}
 		if !found {
-			t.Fatal("Couldn't find torrent %s in %v", r.Hash, s.ListTorrents())
+			t.Fatalf("Couldn't find torrent %s in %v", r.Hash, s.ListTorrents())
 		}
 	}
 

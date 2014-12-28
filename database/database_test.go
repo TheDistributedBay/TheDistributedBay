@@ -25,7 +25,7 @@ func TestDB(t *testing.T) {
 	defer os.RemoveAll("test.db")
 
 	if n := NumTorrents(db); n != 0 {
-		t.Fatal("Expected 0 torrents, got %d", n)
+		t.Fatalf("Expected 0 torrents, got %d", n)
 	}
 
 	r := core.Torrent{}
@@ -40,6 +40,6 @@ func TestDB(t *testing.T) {
 	}
 
 	if n.Hash != r.Hash {
-		t.Fatal("%v != %v", n, r)
+		t.Fatalf("%v != %v", n, r)
 	}
 }

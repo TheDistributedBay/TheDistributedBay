@@ -16,7 +16,7 @@ func DiscoverPeers(cm *network.ConnectionManager, address string) {
 	// Hex encoded string: "The Distributed Bay!"
 	ih, err := dht.DecodeInfoHash("5468652044697374726962757465642042617921")
 	if err != nil {
-		log.Fatal("DHT DecodeInfoHash error: %v\n", err)
+		log.Fatalf("DHT DecodeInfoHash error: %v\n", err)
 	}
 
 	_, portStr, err := net.SplitHostPort(address)
