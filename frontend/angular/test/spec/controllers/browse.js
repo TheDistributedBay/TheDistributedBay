@@ -16,7 +16,20 @@ describe('Controller: BrowseCtrl', function () {
     });
   }));
 
-  it('should attach a list of awesomeThings to the scope', function () {
-    expect(scope.awesomeThings.length).toBe(3);
-  });
+  it('should configure categories and launch an http request', inject(function ($controller) {
+    scope.categories = [{
+      name: 'All',
+      checked: false,
+    }, {
+      name: 'Anime',
+      checked: false,
+    }];
+    scope.$apply();
+    BrowseCtrl = $controller('BrowseCtrl', {
+      $scope: scope
+    });
+    expect(scope.browseCategories[0].name).toEqual('Anime');
+    expect(scope.browseCategories[0].torrents).toEqual([]);
+    expect(scope.browseCategories[0].loading).toEqual(true);
+  }));
 });

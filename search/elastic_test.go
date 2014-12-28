@@ -129,6 +129,15 @@ func TestElasticSearch(t *testing.T) {
 		t.Fatal("Returned wrong result")
 	}
 
+	// Search with no sort statement
+	results, err = e.Search(desc, 0, 10, []uint8{}, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(results.Hits) != 2 {
+		t.Fatal("Wrong number of results")
+	}
+
 	// Search with no query
 	results, err = e.Search("", 0, 10, []uint8{}, "Seeders.Min:desc")
 	if err != nil {
@@ -136,12 +145,6 @@ func TestElasticSearch(t *testing.T) {
 	}
 	if len(results.Hits) < 2 {
 		t.Fatal("Wrong number of results")
-	}
-
-	// Search with bad query
-	results, err = e.Search("(", 0, 10, []uint8{}, "Seeders.Min:desc")
-	if err == nil {
-		t.Fatal("Elastic should have returned an error.")
 	}
 }
 

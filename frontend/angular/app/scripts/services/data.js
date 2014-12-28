@@ -12,20 +12,23 @@
 angular.module('theDistributedBayApp')
   .service('data', function ($http, $q, helpers) {
     var searchCancel;
-    this.search = function(options) {
-      if (searchCancel) {
+    this.search = function(options, noCancel) {
+      if (searchCancel && !noCancel) {
         searchCancel.resolve();
       }
-      options = _.merge({
-        q: ''
-      }, options);
       options = helpers.removeEmpty(options);
       var queryString = _.map(options, function(v, k) {
         return k + '=' + v;
       }).join('&');
       var defer = $q.defer();
       searchCancel = $q.defer();
-      $http.get('/api/search?'+queryString, {timeout: searchCancel.promise, cache: true}).
+      var getOptions =  {
+        cache: true
+      };
+      if (!noCancel) {
+        getOptions.timeout = searchCancel.promise;
+      }
+      $http.get('/api/search?'+queryString, getOptions).
         success(function(data, status, headers, config) {
           defer.resolve(data);
         }).

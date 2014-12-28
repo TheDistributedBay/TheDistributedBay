@@ -43,7 +43,7 @@ a:not[href="/"] {
 
 
 .ng-scope {
-  & > h1 {
+  & > h1, & > h2 {
     @include text-shadow;
     text-align: center;
     & > a {
@@ -51,6 +51,9 @@ a:not[href="/"] {
       @include dotted-link;
       color: white;
     }
+  }
+  & > h2 {
+    font-size: 26px;
   }
   & > form label {
     @include text-shadow;

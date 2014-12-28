@@ -61,9 +61,9 @@ func (sp *TestSearchProvider) Search(term string, from, size int, categories []u
 	}
 	return &elastigo.Hits{
 		Total: 10000,
-		Hits: []elastigo.Hit{elastigo.Hit{
+		Hits: []elastigo.Hit{{
 			Id: "search get",
-		}, elastigo.Hit{
+		}, {
 			Id: "search bad",
 		}},
 	}, nil

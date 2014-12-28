@@ -20,6 +20,10 @@ angular.module('theDistributedBayApp')
       $scope.page = 0;
     });
 
+    var pieces = ($location.search().sort || '').split(':');
+    $scope.sort = pieces[0];
+    $scope.sortDir = pieces[1] || 'desc';
+
     $scope.$on('$routeUpdate', function(){
       var search = $location.search();
       $scope.query = search.q;

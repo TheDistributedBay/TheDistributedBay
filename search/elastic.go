@@ -2,7 +2,6 @@ package search
 
 import (
 	"errors"
-	"strconv"
 
 	elastigo "github.com/mattbaird/elastigo/lib"
 
@@ -15,6 +14,7 @@ type Elastic struct {
 	index string
 }
 
+// Initializes a new elastic search handler.
 func NewElastic(host string, index string) (*Elastic, error) {
 	c := elastigo.NewConn()
 	c.Domain = host
@@ -23,19 +23,23 @@ func NewElastic(host string, index string) (*Elastic, error) {
 	return &Elastic{c, b, index}, nil
 }
 
+// Indexes a torrent and flushes it.
 func (e *Elastic) NewTorrent(t *core.Torrent) {
 	e.c.Index(e.index, "torrent", t.Hash, nil, t)
 	e.c.Flush()
 }
 
+// Indexes a torrent with the bulk indexer
 func (e *Elastic) NewBatchedTorrent(t *core.Torrent) {
 	e.b.Index(e.index, "torrent", t.Hash, "", nil, t, false)
 }
 
+// Flushes the bulk indexer
 func (e *Elastic) Flush() {
 	e.b.Flush()
 }
 
+// Checks if a hash is in the database, returns an error if it's not.
 func (e *Elastic) Exists(h string) error {
 	resp, err := e.c.ExistsBool(e.index, "torrent", h, nil)
 	if err != nil {
@@ -47,30 +51,36 @@ func (e *Elastic) Exists(h string) error {
 	return errors.New("no such document")
 }
 
+// Performs a search for torrents with the relevant options.
 func (e *Elastic) Search(term string, from, size int, categories []uint8, sort string) (*elastigo.Hits, error) {
-	query := ""
-	if len(term) > 0 {
-		query += "(" + term + ")"
-	} else {
-		query += "(*)"
-	}
-	if len(categories) > 0 && categories[0] != 0 {
-		query += " AND ("
-		for i, category := range categories {
-			query += "CategoryID:" + strconv.Itoa((int)(category))
-			if i != (len(categories) - 1) {
-				query += " OR "
-			}
-		}
-		query += ")"
-	}
-	params := map[string]interface{}{
-		"q":    query,
+	// We can't use the DSL since we're using simple_query_string to avoid errors.
+	args := map[string]interface{}{
 		"from": from,
 		"size": size,
-		"sort": sort,
 	}
-	results, err := e.c.SearchUri(e.index, "torrent", params)
+	if len(sort) > 0 {
+		args["sort"] = sort
+	}
+	data := map[string]interface{}{}
+	if len(term) > 0 {
+		data["query"] = map[string]interface{}{
+			"simple_query_string": map[string]interface{}{
+				"query": term,
+			},
+		}
+	}
+	if len(categories) > 0 && categories[0] != 0 {
+		categoryInterface := make([]interface{}, len(categories))
+		for i, category := range categories {
+			categoryInterface[i] = category
+		}
+		data["filter"] = map[string]interface{}{
+			"terms": map[string]interface{}{
+				"CategoryID": categoryInterface,
+			},
+		}
+	}
+	results, err := e.c.Search(e.index, "torrent", args, data)
 	if err != nil {
 		return nil, err
 	}

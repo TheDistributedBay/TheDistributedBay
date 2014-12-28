@@ -4,7 +4,7 @@
       <tr>
         <th class="title-row">Torrents</th>
         <th ng-repeat="header in headers" class="{{header}}-column">
-          <a href="{{currentSearchWithSort(header, sort, sortDir)}}" ng-click="sortBy(header)">
+          <a href="{{currentSearchWithSort(header, sort, sortDir, category)}}" ng-click="sortBy(header)">
             {{header}}
             <i ng-if="sort == header && sortDir == 'desc'" class="fa fa-caret-down"></i>
             <i ng-if="sort == header && sortDir == 'asc'" class="fa fa-caret-up"></i>
@@ -34,7 +34,7 @@
       </tr>
     </tbody>
   </table>
-  <div class="pages">
+  <div class="pages" ng-if="!noNav">
     <a href="{{jumpLinks.start}}" title="Beginning"><i class="fa fa-angle-double-left"></i></a>
     <a href="{{jumpLinks.prev}}" title="Previous"><i class="fa fa-angle-left"></i></a>
     <a ng-repeat="page in pageLinks" href="{{page.link}}" title="Page {{page.page}}" ng-class="{active: page.active}" ng-click="updateSearch(page)">{{page.page}}</a>
