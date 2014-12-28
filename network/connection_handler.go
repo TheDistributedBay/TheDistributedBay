@@ -6,6 +6,7 @@ import (
 	"sync"
 
 	"github.com/TheDistributedBay/TheDistributedBay/core"
+	"github.com/TheDistributedBay/TheDistributedBay/dbchannel"
 )
 
 type ConnectionHandler struct {
@@ -55,51 +56,21 @@ func (h *ConnectionHandler) shovelout() {
 	log.Print("Received")
 	h.lock.Unlock()
 
-	// Shove slow torrents and fast torrents
-	f := make(chan *core.Torrent, 2)
-	s := make(chan string)
-	go h.db.AddTorrentClient(f)
-	go h.db.GetTorrents(s)
-	fOpen := true
-	sOpen := true
-	for {
-		if !sOpen && !fOpen {
-			log.Print("restarting slow & fast sync")
-			go h.db.AddTorrentClient(f)
-			go h.db.GetTorrents(s)
+	dc := dbchannel.New(h.db)
+	log.Print("streaming torrents")
+	for t := range dc.Output {
+		if h.SeenTorrent(t.GetHash()) {
+			continue
 		}
-		var t *core.Torrent = nil
-		var err error
-		var hash string
-		select {
-		case t, fOpen = <-f:
-			if !fOpen {
-				log.Print("too slow to keep fast path open")
-				f = make(chan *core.Torrent, 2)
-				continue
-			}
-			if h.SeenTorrent(t.Hash) {
-				continue
-			}
-		case hash, sOpen = <-s:
-			if !sOpen {
-				log.Print("slow sync finished")
-				s = make(chan string)
-				continue
-			}
-			if h.SeenTorrent(hash) {
-				continue
-			}
-			t, err = h.db.Get(hash)
-			if err != nil {
-				log.Printf("Error fetching %v : %v", hash, err)
-				continue
-			}
+		tr, err := t.GetTorrent()
+		if err != nil {
+			log.Printf("Error fetching %v : %v", t.GetHash(), err)
+			continue
 		}
-		log.Print("sending torrent")
-		h.RecordTorrent(t.Hash)
-		h.t.Write(Message{"Torrents", nil, []*core.Torrent{t}})
+		h.RecordTorrent(tr.Hash)
+		h.t.Write(Message{"Torrents", nil, []*core.Torrent{tr}})
 	}
+	log.Print("dbchannel closed, should be impossible")
 }
 
 // Shovels torrents into the db
