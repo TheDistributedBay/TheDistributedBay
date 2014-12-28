@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"strings"
+  "strconv"
 	"time"
 
 	"github.com/TheDistributedBay/TheDistributedBay/core"
@@ -32,6 +33,10 @@ type TorrentBlob struct {
 func (th SearchHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query().Get("q")
 	sort := r.URL.Query().Get("sort")
+	size, err := strconv.Atoi(r.URL.Query().Get("size"))
+  if err != nil {
+    size = 35
+  }
 	categories := strings.Split(r.URL.Query().Get("category"), ",")
 	categoryIds := make([]uint8, len(categories))
 	for i, category := range categories {
@@ -40,10 +45,7 @@ func (th SearchHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	p := 0
 	fmt.Sscan(r.URL.Query().Get("p"), &p)
 
-	var results []*core.Torrent
-	var count int
-
-	results, count, err := th.s.Search(q, 35*p, 35, categoryIds, sort)
+  results, count, err := th.s.Search(q, size*p, size, categoryIds, sort)
 	if err != nil {
 		log.Print(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)

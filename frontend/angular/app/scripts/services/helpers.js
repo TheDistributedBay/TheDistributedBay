@@ -82,7 +82,7 @@ angular.module('theDistributedBayApp')
      * @params {String} sort string
      * @return {String}
      */
-    this.currentSearchWithSort = function(sort, curSort, sortDir) {
+    this.currentSearchWithSort = function(sort, curSort, sortDir, category) {
       var dir = 'desc';
       if (sort === curSort) {
         dir = sortDir === 'desc' ? 'asc' : 'desc';
@@ -91,7 +91,11 @@ angular.module('theDistributedBayApp')
       search.sort = sort + ':' + dir;
       delete search.p;
 
-      return $location.path() + '?' + _.map(search, function(v, k) {
+      if (category) {
+        search.category = category;
+      }
+
+      return '/search?' + _.map(search, function(v, k) {
         return k + '=' + v;
       }).join('&');
     };

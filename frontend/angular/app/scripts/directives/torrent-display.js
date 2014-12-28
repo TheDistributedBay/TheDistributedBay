@@ -11,12 +11,19 @@ angular.module('theDistributedBayApp')
     return {
       templateUrl: 'views/torrent-display.html',
       restrict: 'E',
+      scope: {
+        torrents: '=',
+        page: '=',
+        pages: '=',
+        noNav: '=',
+        sort: '=',
+        sortDir: '=',
+        loading: '=',
+        category: '='
+      },
       controller: function($scope, $location, helpers) {
         $scope.headers = ['Age', 'Size', 'Seeders', 'Leechers'];
         $scope.sanitize = helpers.sanitizeName;
-        var pieces = ($location.search().sort || '').split(':');
-        $scope.sort = pieces[0];
-        $scope.sortDir = pieces[1] || 'desc';
         $scope.$watch('torrents', function() {
           _.each($scope.torrents, function(torrent) {
             torrent.TimeAgo = moment(torrent.CreatedAt).fromNow();
@@ -48,8 +55,10 @@ angular.module('theDistributedBayApp')
             });
           }
         };
-        $scope.updateJumpLinks();
-        $scope.$watch('torrents', $scope.updateJumpLinks);
+        if (!$scope.noNav) {
+          $scope.updateJumpLinks();
+          $scope.$watch('torrents', $scope.updateJumpLinks);
+        }
       }
     };
   });

@@ -37,10 +37,10 @@ describe('Service: helpers', function () {
   });
 
   it('should should return currentSearchWithSort', function () {
-    expect(helpers.currentSearchWithSort('Age', 'Seeders', 'desc')).toBe('/?sort=Age:desc');
-    expect(helpers.currentSearchWithSort('Seeders', 'Seeders', 'desc')).toBe('/?sort=Seeders:asc');
-    expect(helpers.currentSearchWithSort('Seeders', 'Seeders', 'asc')).toBe('/?sort=Seeders:desc');
-    expect(helpers.currentSearchWithSort('Age', 'Seeders', 'asc')).toBe('/?sort=Age:desc');
+    expect(helpers.currentSearchWithSort('Age', 'Seeders', 'desc')).toBe('/search?sort=Age:desc');
+    expect(helpers.currentSearchWithSort('Seeders', 'Seeders', 'desc')).toBe('/search?sort=Seeders:asc');
+    expect(helpers.currentSearchWithSort('Seeders', 'Seeders', 'asc')).toBe('/search?sort=Seeders:desc');
+    expect(helpers.currentSearchWithSort('Age', 'Seeders', 'asc')).toBe('/search?sort=Age:desc');
   });
 
   it('should correctly identify the recent route', inject(function($location) {

@@ -1,2 +1,5 @@
-<p>This is the browse view.</p>
-<a href="file:///dev/null">Dev Null</a>
+<h1>Browse Torrents</h1>
+<div class="torrents" ng-repeat="category in browseCategories">
+  <h2><a href="/search?category={{category.name}}">{{category.name}} Torrents</a></h2>
+  <torrent-display no-nav="true" torrents="category.torrents" loading="category.loading" category="category.name"></torrent-display>
+</div>
