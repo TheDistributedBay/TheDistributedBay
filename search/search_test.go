@@ -68,6 +68,16 @@ func (sp *TestSearchProvider) Search(term string, from, size int, categories []u
 		}},
 	}, nil
 }
+func (sp *TestSearchProvider) MoreLikeThis(hash string) (*elastigo.Hits, error) {
+	return &elastigo.Hits{
+		Total: 10000,
+		Hits: []elastigo.Hit{{
+			Id: "search get",
+		}, {
+			Id: "search bad",
+		}},
+	}, nil
+}
 
 func TestSearcherCreation(t *testing.T) {
 	db := TestDB{}
@@ -110,6 +120,29 @@ func TestSearcherSearch(t *testing.T) {
 	}
 	if count != 10000 {
 		t.Fatal("Incorrect results count")
+	}
+	if len(torrents) != 1 {
+		t.Fatal("Wrong number of returned torrents.")
+	}
+	if torrents[0].Name != "search torrent" {
+		t.Fatal("Wrong torrent")
+	}
+
+	// Bad search
+	_, _, err = s.Search("bad", 5, 10, []uint8{1, 2}, "banana:asc")
+	if err == nil {
+		t.Fatal("Search should have caused an error")
+	}
+}
+
+func TestSearcherMoreLikeThis(t *testing.T) {
+	c := make(chan bool, 2)
+	b := &TestSearchProvider{t: t, c: c}
+	db := &TestDB{t}
+	s := &Searcher{b, db}
+	torrents, err := s.MoreLikeThis("test hash")
+	if err != nil {
+		t.Fatal(err)
 	}
 	if len(torrents) != 1 {
 		t.Fatal("Wrong number of returned torrents.")

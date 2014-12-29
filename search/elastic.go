@@ -2,6 +2,8 @@ package search
 
 import (
 	"errors"
+  "fmt"
+  "encoding/json"
 
 	elastigo "github.com/mattbaird/elastigo/lib"
 
@@ -85,4 +87,26 @@ func (e *Elastic) Search(term string, from, size int, categories []uint8, sort s
 		return nil, err
 	}
 	return &results.Hits, nil
+}
+
+
+func (e *Elastic) MoreLikeThis(hash string) (*elastigo.Hits, error) {
+  uriVal := fmt.Sprintf("/%s/torrent/%s/_mlt", e.index, hash)
+	var retval elastigo.SearchResult
+	body, err := e.c.DoCommand("GET", uriVal, map[string]interface{}{
+    "min_term_freq": 1,
+    "mlt_fields": "Name,Description",
+  }, map[string]interface{}{})
+	if err != nil {
+		return &retval.Hits, err
+	}
+	if err == nil {
+		// marshall into json
+		jsonErr := json.Unmarshal([]byte(body), &retval)
+		if jsonErr != nil {
+			return &retval.Hits, jsonErr
+		}
+	}
+	retval.RawJSON = body
+	return &retval.Hits, err
 }

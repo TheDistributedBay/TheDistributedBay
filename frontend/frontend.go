@@ -50,7 +50,7 @@ func ApiRouter(db core.Database, s *search.Searcher, updater *torrent.StatsUpdat
 	r := mux.NewRouter()
 	r.Methods("GET").Path("/api/search").Handler(SearchHandler{s, db, updater})
 	r.Methods("POST").Path("/api/add_torrent").Handler(AddTorrentHandler{db})
-	r.Methods("GET").Path("/api/torrent").Handler(GetTorrentHandler{updater, db})
+	r.Methods("GET").Path("/api/torrent").Handler(GetTorrentHandler{s, updater, db})
 
 	return r
 }

@@ -12,6 +12,7 @@ type SearchProvider interface {
 	Exists(hash string) error
 	NewBatchedTorrent(t *core.Torrent)
 	Search(term string, from, size int, categories []uint8, sort string) (*elastigo.Hits, error)
+  MoreLikeThis(hash string) (*elastigo.Hits, error)
 }
 
 func NewSearcher(db core.Database, index string) (*Searcher, error) {
@@ -70,4 +71,20 @@ func (s *Searcher) Search(term string, from, size int, categories []uint8, sort 
 		torrents = append(torrents, t)
 	}
 	return torrents, result.Total, nil
+}
+func (s *Searcher) MoreLikeThis(hash string) ([]*core.Torrent, error){
+  result, err := s.b.MoreLikeThis(hash)
+  if err != nil {
+    return nil, err
+  }
+	torrents := make([]*core.Torrent, 0, len(result.Hits))
+	for _, e := range result.Hits {
+		t, err := s.db.Get(e.Id)
+		if err != nil {
+			log.Print("Stale torrent in index ", e.Id)
+			continue
+		}
+		torrents = append(torrents, t)
+	}
+  return torrents, nil
 }

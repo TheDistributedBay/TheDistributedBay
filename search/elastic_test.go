@@ -148,6 +148,40 @@ func TestElasticSearch(t *testing.T) {
 	}
 }
 
+func TestElasticMoreLikeThis(t *testing.T) {
+
+	e, err := NewElastic("localhost", "thedistributedbay_test")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	desc := randSeq(40)
+	t1 := &core.Torrent{
+		Hash:        randSeq(40),
+		Name:        randSeq(40),
+		Description: desc,
+		CategoryID:  1,
+		Seeders:     core.NewRange(100),
+		Leechers:    core.NewRange(10),
+	}
+	t2 := &core.Torrent{
+		Hash:        randSeq(40),
+		Name:        randSeq(40),
+		Description: desc,
+		CategoryID:  2,
+		Seeders:     core.NewRange(10),
+		Leechers:    core.NewRange(100),
+	}
+	e.NewTorrent(t1)
+	e.NewTorrent(t2)
+
+  _, err = e.MoreLikeThis(t1.Hash)
+  if err != nil {
+    t.Fatal(err)
+  }
+  // TODO: Look at results and figure out why nothing is being returned.
+}
+
 var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 
 func randSeq(n int) string {

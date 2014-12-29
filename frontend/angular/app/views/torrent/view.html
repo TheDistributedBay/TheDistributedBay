@@ -1,5 +1,5 @@
 <h1><a href="/torrent/{{torrent.Hash}}/{{sanitize(torrent.Name)}}" class="link-textcolor vm">{{torrent.Name}}</a></h1>
-<div id="details">
+<div id="details" ng-class="{loading: loading}">
   <table>
     <tr>
       <th>Type:</th>
@@ -43,4 +43,8 @@
   <div id="filelistContainer">
     <a id="show"></a>
   </div>
+</div>
+<h2>Related</h2>
+<div class="torrents">
+  <torrent-display torrents="torrent.MoreLikeThis" loading="loading" no-nav="true"></torrent-display>
 </div>
